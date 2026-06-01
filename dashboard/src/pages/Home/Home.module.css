@@ -1,0 +1,137 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.greeting { display: flex; flex-direction: column; gap: 6px; }
+.greetingText {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--text-primary);
+}
+.name { color: var(--accent); }
+.sub { font-size: 15px; color: var(--text-secondary); }
+
+/* Stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.statCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow);
+  transition: border-color var(--transition);
+}
+.statCard:hover { border-color: var(--accent); }
+.statIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.statInfo { display: flex; flex-direction: column; gap: 2px; }
+.statValue {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1;
+}
+.statLabel { font-size: 12px; color: var(--text-muted); }
+
+/* Section */
+.section { display: flex; flex-direction: column; gap: 16px; }
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+/* Course card */
+.courseGrid { display: flex; flex-direction: column; gap: 12px; }
+.courseCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow);
+}
+.courseInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.courseTitle { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.courseProgress { font-size: 12px; color: var(--text-muted); }
+.progressBar {
+  width: 120px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.progressFill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+.continueBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #000;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: opacity var(--transition);
+  flex-shrink: 0;
+}
+.continueBtn:hover { opacity: 0.88; }
+
+/* Empty state */
+.emptyState {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+.emptyIcon { color: var(--accent); opacity: 0.5; }
+.emptySubtext { font-size: 13px; color: var(--text-muted); }
+
+/* Mobile */
+@media (max-width: 1024px) {
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .courseCard { flex-direction: column; align-items: flex-start; }
+  .progressBar { width: 100%; }
+  .continueBtn { width: 100%; text-align: center; }
+}
+@media (max-width: 480px) {
+  .statsGrid { grid-template-columns: 1fr 1fr; }
+}

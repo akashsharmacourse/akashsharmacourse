@@ -1,0 +1,55 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.dialog {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+.icon {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--danger-dim);
+  color: var(--danger);
+  display: flex; align-items: center; justify-content: center;
+}
+.title { font-family: var(--font-display); font-size: 20px; color: var(--text-primary); }
+.message { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+.actions { display: flex; gap: 12px; width: 100%; }
+.cancelBtn {
+  flex: 1; padding: 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600; font-size: 14px;
+  transition: border-color var(--transition);
+}
+.cancelBtn:hover { border-color: var(--border-hover); }
+.confirmBtn {
+  flex: 1; padding: 11px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700; font-size: 14px;
+  transition: opacity var(--transition);
+}
+.confirmBtn:hover { opacity: 0.88; }

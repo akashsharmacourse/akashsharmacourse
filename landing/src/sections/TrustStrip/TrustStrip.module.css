@@ -1,0 +1,93 @@
+/* ─── POSITIONING ─── */
+.section {
+  position: relative;
+  z-index: 10;
+
+  /* ─── BOX MODEL ─── */
+  width: 100%;
+  padding: 16px 0;
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  /* ─── VISUAL ─── */
+  background-color: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.marqueeRow {
+  /* ─── BOX MODEL ─── */
+  width: 100%;
+  overflow: hidden;
+}
+
+.track {
+  /* ─── POSITIONING ─── */
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  /* ─── BOX MODEL ─── */
+  width: max-content;
+  will-change: transform;
+}
+
+/* Row animations */
+.scrollLeft {
+  animation: scrollLeftMarquee 35s linear infinite;
+}
+
+.scrollRight {
+  animation: scrollRightMarquee 35s linear infinite;
+}
+
+@keyframes scrollLeftMarquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-33.333%, 0, 0); }
+}
+
+@keyframes scrollRightMarquee {
+  0% { transform: translate3d(-33.333%, 0, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollLeft, .scrollRight {
+    animation: none;
+    overflow-x: auto;
+    width: 100%;
+    justify-content: space-around;
+  }
+}
+
+.item {
+  /* ─── POSITIONING ─── */
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  white-space: nowrap;
+}
+
+.text {
+  /* ─── TYPOGRAPHY ─── */
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  /* ─── VISUAL ─── */
+  color: var(--text-secondary);
+}
+
+.separator {
+  /* ─── TYPOGRAPHY ─── */
+  font-size: 10px;
+
+  /* ─── VISUAL ─── */
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
+}

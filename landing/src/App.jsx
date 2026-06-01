@@ -1,0 +1,150 @@
+import React, { Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import Hero from './sections/Hero/Hero';
+import TrustStrip from './sections/TrustStrip/TrustStrip';
+
+import EnrollForm from './components/EnrollForm/EnrollForm';
+import CourseSuccess from './pages/Success/CourseSuccess';
+import OneOnOneSuccess from './pages/Success/OneOnOneSuccess';
+import ScrollToTop from './components/ScrollToTop/ScrollToTop';
+
+// Below-fold sections are lazy loaded to optimize initial paint and bundle sizes
+const Courses = React.lazy(() => import('./sections/Courses/Courses'));
+const About = React.lazy(() => import('./sections/About/About'));
+const PnlProof = React.lazy(() => import('./sections/PnlProof/PnlProof'));
+const StudentResults = React.lazy(() => import('./sections/StudentResults/StudentResults'));
+const Testimonials = React.lazy(() => import('./sections/Testimonials/Testimonials'));
+const Pricing = React.lazy(() => import('./sections/Pricing/Pricing'));
+const FAQ = React.lazy(() => import('./sections/FAQ/FAQ'));
+const CTA = React.lazy(() => import('./sections/CTA/CTA'));
+const Footer = React.lazy(() => import('./sections/Footer/Footer'));
+
+// Lazy load OneOnOne page
+const OneOnOne = React.lazy(() => import('./pages/OneOnOne/OneOnOne'));
+
+function HomePage() {
+  return (
+    <>
+      {/* Above-fold sections rendered immediately for instant FCP */}
+      <Hero />
+      <TrustStrip />
+      
+      {/* Below-fold sections wrapped in Suspense for fluid lazy-loading */}
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <Courses />
+      </Suspense>
+
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <About />
+      </Suspense>
+      
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <PnlProof />
+      </Suspense>
+      
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <StudentResults />
+      </Suspense>
+      
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <Testimonials />
+      </Suspense>
+      
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <Pricing />
+      </Suspense>
+      
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <FAQ />
+      </Suspense>
+      
+      <Suspense fallback={<div className="sectionLoading"></div>}>
+        <CTA />
+      </Suspense>
+    </>
+  );
+}
+
+function EnrollFormPage({ type }) {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (formData) => {
+    // Save lead to backend
+    try {
+      await fetch('http://localhost:5000/api/payment/save-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, type }),
+      });
+    } catch (err) {
+      console.error('Lead save failed:', err);
+    }
+    // Razorpay will be integrated here later
+    // For now navigate to success page for testing
+    navigate(type === 'course' ? '/success/course' : '/success/1on1');
+  };
+
+  return (
+    <main style={{
+      minHeight: '100svh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '100px 20px 40px',
+      background: 'var(--bg-primary)'
+    }}>
+      <EnrollForm type={type} onSubmit={handleSubmit} />
+    </main>
+  );
+}
+
+function Layout() {
+  const location = useLocation();
+  
+  // Pages jahan Navbar + Footer nahi chahiye
+  const hideLayout = [
+    '/enroll',
+    '/enroll/1on1', 
+    '/success/course',
+    '/success/1on1',
+  ];
+  
+  const shouldHide = hideLayout.includes(location.pathname);
+
+  return (
+    <>
+      <ScrollToTop />
+      {!shouldHide && <Navbar />}
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/1on1" element={
+          <Suspense fallback={<div className="sectionLoading"></div>}>
+            <OneOnOne />
+          </Suspense>
+        } />
+        <Route path="/enroll" element={<EnrollFormPage type="course" />} />
+        <Route path="/enroll/1on1" element={<EnrollFormPage type="1on1" />} />
+        <Route path="/success/course" element={<CourseSuccess />} />
+        <Route path="/success/1on1" element={<OneOnOneSuccess />} />
+      </Routes>
+      {!shouldHide && (
+        <Suspense fallback={<div className="sectionLoading"></div>}>
+          <Footer />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <Layout />
+    </BrowserRouter>
+  );
+}
+
+export default App;
+
+

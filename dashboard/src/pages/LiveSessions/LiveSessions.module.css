@@ -1,0 +1,20 @@
+.page { display: flex; flex-direction: column; gap: 32px; }
+.header { display: flex; flex-direction: column; gap: 8px; }
+.heading { font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 2rem); color: var(--text-primary); }
+.sub { font-size: 14px; color: var(--text-secondary); max-width: 560px; line-height: 1.6; }
+.section { display: flex; flex-direction: column; gap: 16px; }
+.sectionTitle { font-family: var(--font-display); font-size: 18px; color: var(--text-primary); }
+.empty {
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.emptyIcon { color: var(--accent); opacity: 0.4; }
