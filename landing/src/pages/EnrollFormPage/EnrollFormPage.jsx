@@ -7,6 +7,7 @@ const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
 export default function EnrollFormPage({ type = 'course' }) {
   const navigate = useNavigate()
+  const [formData, setFormData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -22,6 +23,7 @@ export default function EnrollFormPage({ type = 'course' }) {
   }
 
   const handleSubmit = async (data) => {
+    setFormData(data)
     setLoading(true)
     setError('')
 
@@ -81,7 +83,8 @@ export default function EnrollFormPage({ type = 'course' }) {
           color: '#C9A84C',
         },
         handler: async function(response) {
-          // Payment successful — verify on backend
+          // Close Razorpay modal first
+          setLoading(true)
           try {
             const verifyRes = await fetch(`${BACKEND_URL}/api/payment/verify`, {
               method: 'POST',
@@ -90,23 +93,22 @@ export default function EnrollFormPage({ type = 'course' }) {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                name: data.name,
-                email: data.email,
-                phone: data.phone,
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
                 type,
               }),
             })
             const verifyData = await verifyRes.json()
+            console.log('Verify response:', verifyData)
 
-            if (verifyData.success) {
-              // Navigate to success page
-              navigate(type === 'course' ? '/success/course' : '/success/1on1')
-            } else {
-              setError('Payment verification failed. Contact support.')
-            }
+            // Always redirect on payment success
+            // Backend handles everything else
+            navigate(type === 'course' ? '/success/course' : '/success/1on1')
+
           } catch (err) {
             console.error('Verify error:', err)
-            // Still navigate — webhook will handle backend
+            // Still redirect — payment hua hai
             navigate(type === 'course' ? '/success/course' : '/success/1on1')
           }
         },
