@@ -69,7 +69,7 @@ router.post('/verify', async (req, res) => {
       name, email, phone, type
     } = req.body
 
-    // Verify signature
+    // STEP 1 — Verify signature
     const body = razorpay_order_id + '|' + razorpay_payment_id
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -80,24 +80,26 @@ router.post('/verify', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid signature' })
     }
 
-    // Signature valid — process payment
     const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
 
     if (type === 'course') {
-      const sheetId = process.env.GOOGLE_SHEET_ID_COURSE
+      
+      // STEP 2 — Sheet update (fail hone pe bhi aage badho)
+      try {
+        const sheetId = process.env.GOOGLE_SHEET_ID_COURSE
+        await updatePaymentStatus(sheetId, 'Leads', email, 'paid')
+        await appendToSheet(sheetId, 'Enrollments', [
+          timestamp, name, email, phone, '₹9,999', 'active'
+        ])
+        console.log('Sheet updated successfully')
+      } catch (sheetErr) {
+        console.error('Sheet update failed — continuing:', sheetErr.message)
+      }
 
-      // Update lead status
-      await updatePaymentStatus(sheetId, 'Leads', email, 'paid')
-
-      // Add to enrollments
-      await appendToSheet(sheetId, 'Enrollments', [
-        timestamp, name, email, phone, '₹9,999', 'active'
-      ])
-
-      // Generate temp password
+      // STEP 3 — Generate password
       const tempPassword = `Akash@${Math.floor(1000 + Math.random() * 9000)}`
 
-      // Create Firebase user
+      // STEP 4 — Firebase user create
       let userRecord
       try {
         userRecord = await auth.createUser({
@@ -105,60 +107,85 @@ router.post('/verify', async (req, res) => {
           password: tempPassword,
           displayName: name,
         })
+        console.log('Firebase user created:', userRecord.uid)
       } catch (e) {
-        userRecord = await auth.getUserByEmail(email)
-        await auth.updateUser(userRecord.uid, { password: tempPassword })
+        if (e.code === 'auth/email-already-exists') {
+          userRecord = await auth.getUserByEmail(email)
+          await auth.updateUser(userRecord.uid, { password: tempPassword })
+          console.log('Firebase user updated:', userRecord.uid)
+        } else {
+          console.error('Firebase user error:', e.message)
+          return res.status(500).json({ success: false, error: 'User creation failed' })
+        }
       }
 
-      // Store in Firestore
-      const courseSnap = await db.collection('courses')
-        .where('published', '==', true)
-        .limit(1)
-        .get()
+      // STEP 5 — Firestore update
+      try {
+        const courseSnap = await db.collection('courses')
+          .where('published', '==', true)
+          .limit(1)
+          .get()
+        const courseId = courseSnap.empty ? '' : courseSnap.docs[0].id
 
-      const courseId = courseSnap.empty ? '' : courseSnap.docs[0].id
+        await db.collection('users').doc(userRecord.uid).set({
+          name,
+          email,
+          phone,
+          hasAccess: true,
+          enrolledCourseId: courseId,
+          completedChapters: [],
+          progress: 0,
+          watchTimeMinutes: 0,
+          createdAt: new Date().toISOString(),
+          paymentAmount: 9999,
+          paymentId: razorpay_payment_id,
+        }, { merge: true })
+        console.log('Firestore updated successfully')
+      } catch (firestoreErr) {
+        console.error('Firestore error:', firestoreErr.message)
+      }
 
-      await db.collection('users').doc(userRecord.uid).set({
-        name,
-        email,
-        phone,
-        hasAccess: true,
-        enrolledCourseId: courseId,
-        completedChapters: [],
-        progress: 0,
-        watchTimeMinutes: 0,
-        createdAt: new Date().toISOString(),
-        paymentAmount: 9999,
-        paymentId: razorpay_payment_id,
-      }, { merge: true })
-
-      // Send welcome email
-      await sendWelcomeEmail({
-        to: email,
-        name,
-        email,
-        password: tempPassword,
-        loginUrl: process.env.DASHBOARD_URL || 'http://localhost:5173/login',
-      })
+      // STEP 6 — Send email
+      try {
+        await sendWelcomeEmail({
+          to: email,
+          name,
+          email,
+          password: tempPassword,
+          loginUrl: process.env.DASHBOARD_URL || 'http://localhost:5173/login',
+        })
+        console.log('Welcome email sent to:', email)
+      } catch (emailErr) {
+        console.error('Email error:', emailErr.message)
+      }
     }
 
     if (type === '1on1') {
-      const sheetId = process.env.GOOGLE_SHEET_ID_ONEONONE
+      try {
+        const sheetId = process.env.GOOGLE_SHEET_ID_ONEONONE
+        await appendToSheet(sheetId, '1on1Enrollments', [
+          timestamp, name, email, phone, '₹24,999', 'paid'
+        ])
+      } catch (sheetErr) {
+        console.error('1on1 Sheet error:', sheetErr.message)
+      }
 
-      await appendToSheet(sheetId, '1on1Enrollments', [
-        timestamp, name, email, phone, '₹24,999', 'paid'
-      ])
-
-      await sendOneOnOneConfirmationEmail({
-        to: email,
-        name,
-        calendlyLink: process.env.CALENDLY_LINK,
-      })
+      try {
+        await sendOneOnOneConfirmationEmail({
+          to: email,
+          name,
+          calendlyLink: process.env.CALENDLY_LINK,
+        })
+      } catch (emailErr) {
+        console.error('1on1 Email error:', emailErr.message)
+      }
     }
 
+    // Always return success if signature verified
     res.json({ success: true })
+
   } catch (err) {
-    console.error('Verify error:', err)
+    console.error('Verify route error:', err)
     res.status(500).json({ success: false, error: 'Verification failed' })
   }
 })
