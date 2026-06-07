@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import EnrollForm from '../../components/EnrollForm/EnrollForm.jsx'
 
@@ -7,7 +7,7 @@ const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
 export default function EnrollFormPage({ type = 'course' }) {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState(null)
+  const formDataRef = useRef(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -23,7 +23,7 @@ export default function EnrollFormPage({ type = 'course' }) {
   }
 
   const handleSubmit = async (data) => {
-    setFormData(data)
+    formDataRef.current = data
     setLoading(true)
     setError('')
 
@@ -93,9 +93,9 @@ export default function EnrollFormPage({ type = 'course' }) {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
+                name: formDataRef.current?.name || data.name,
+                email: formDataRef.current?.email || data.email,
+                phone: formDataRef.current?.phone || data.phone,
                 type,
               }),
             })
