@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { PaymentProvider, usePayment } from './context/PaymentContext';
 import Navbar from './components/Navbar/Navbar';
 import Hero from './sections/Hero/Hero';
 import TrustStrip from './sections/TrustStrip/TrustStrip';
@@ -92,8 +93,16 @@ function Layout() {
         } />
         <Route path="/enroll" element={<EnrollFormPage type="course" />} />
         <Route path="/enroll/1on1" element={<EnrollFormPage type="1on1" />} />
-        <Route path="/success/course" element={<CourseSuccess />} />
-        <Route path="/success/1on1" element={<OneOnOneSuccess />} />
+        <Route path="/success/course" element={
+          <SuccessRoute>
+            <CourseSuccess />
+          </SuccessRoute>
+        } />
+        <Route path="/success/1on1" element={
+          <SuccessRoute>
+            <OneOnOneSuccess />
+          </SuccessRoute>
+        } />
       </Routes>
       {!shouldHide && (
         <Suspense fallback={<div className="sectionLoading"></div>}>
@@ -104,11 +113,23 @@ function Layout() {
   );
 }
 
+function SuccessRoute({ children }) {
+  const { paymentSuccess } = usePayment();
+  
+  if (!paymentSuccess) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+}
+
 export function App() {
   return (
-    <BrowserRouter>
-      <Layout />
-    </BrowserRouter>
+    <PaymentProvider>
+      <BrowserRouter>
+        <Layout />
+      </BrowserRouter>
+    </PaymentProvider>
   );
 }
 

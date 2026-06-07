@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import EnrollForm from '../../components/EnrollForm/EnrollForm.jsx'
+import { usePayment } from '../../context/PaymentContext.jsx'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID
 
 export default function EnrollFormPage({ type = 'course' }) {
   const navigate = useNavigate()
+  const { setPaymentSuccess } = usePayment()
   const formDataRef = useRef(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -104,11 +106,13 @@ export default function EnrollFormPage({ type = 'course' }) {
 
             // Always redirect on payment success
             // Backend handles everything else
+            setPaymentSuccess(true)
             navigate(type === 'course' ? '/success/course' : '/success/1on1')
 
           } catch (err) {
             console.error('Verify error:', err)
             // Still redirect — payment hua hai
+            setPaymentSuccess(true)
             navigate(type === 'course' ? '/success/course' : '/success/1on1')
           }
         },
