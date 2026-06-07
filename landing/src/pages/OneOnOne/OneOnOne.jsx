@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { oneOnOneData } from '../../data/data.js';
 import { useInView } from '../../hooks/useInView';
 import {

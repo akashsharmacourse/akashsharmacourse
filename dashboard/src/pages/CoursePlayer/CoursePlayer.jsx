@@ -1,28 +1,159 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'
-import { ChevronLeft, ChevronDown, ChevronUp, BookOpen, AlertCircle, CheckCircle } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext.jsx'
+import { useEffect, useState, useRef } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 import { db } from '../../config/firebase.js'
-import VideoPlayer from '../../components/VideoPlayer/VideoPlayer.jsx'
-import PDFViewer from '../../components/PDFViewer/PDFViewer.jsx'
-import ChapterItem from '../../components/ChapterItem/ChapterItem.jsx'
+import { useAuth } from '../../context/AuthContext.jsx'
+import {
+  ChevronDown, ChevronRight, FileText,
+  Lock, CheckCircle, ArrowLeft, Play,
+  AlertCircle
+} from 'lucide-react'
 import styles from './CoursePlayer.module.css'
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+
+// ── Secure Video Player ───────────────────────────────
+function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
+  console.log('BACKEND_URL:', BACKEND_URL)
+  console.log('PublicId:', publicId)
+
+  const [videoUrl, setVideoUrl] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    if (!publicId) return
+    fetchSignedUrl()
+  }, [publicId])
+
+  const fetchSignedUrl = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const auth = getAuth()
+      const token = await auth.currentUser.getIdToken()
+      const encodedId = encodeURIComponent(publicId)
+
+      const res = await fetch(`${BACKEND_URL}/api/video/signed-url/${encodedId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      const data = await res.json()
+      if (data.success) {
+        setVideoUrl(data.url)
+      } else {
+        setError('Failed to load video. Please try again.')
+      }
+    } catch (err) {
+      console.error('Video URL fetch error:', err)
+      setError('Failed to load video. Please try again.')
+    }
+    setLoading(false)
+  }
+
+  // ── DRM Protection ────────────────────────────────
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    // Disable right click on video
+    const preventRightClick = (e) => e.preventDefault()
+    video.addEventListener('contextmenu', preventRightClick)
+
+    // Pause on devtools open
+    const handleVisibilityChange = () => {
+      if (document.hidden) video.pause()
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Detect devtools
+    let devtoolsOpen = false
+    const threshold = 160
+    const checkDevTools = () => {
+      if (
+        window.outerWidth - window.innerWidth > threshold ||
+        window.outerHeight - window.innerHeight > threshold
+      ) {
+        if (!devtoolsOpen) {
+          devtoolsOpen = true
+          video.pause()
+        }
+      } else {
+        devtoolsOpen = false
+      }
+    }
+    const devToolsInterval = setInterval(checkDevTools, 1000)
+
+    // Disable keyboard shortcuts
+    const preventShortcuts = (e) => {
+      if (
+        (e.ctrlKey && ['s', 'u', 'i', 'j', 'c'].includes(e.key.toLowerCase())) ||
+        e.key === 'F12'
+      ) {
+        e.preventDefault()
+      }
+    }
+    document.addEventListener('keydown', preventShortcuts)
+
+    return () => {
+      video.removeEventListener('contextmenu', preventRightClick)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      document.removeEventListener('keydown', preventShortcuts)
+      clearInterval(devToolsInterval)
+    }
+  }, [videoUrl])
+
+  if (loading) return (
+    <div className={styles.videoLoading}>
+      <div className={styles.spinner} />
+      <p>Loading secure video...</p>
+    </div>
+  )
+
+  if (error) return (
+    <div className={styles.videoError}>
+      <AlertCircle size={32} />
+      <p>{error}</p>
+      <button onClick={fetchSignedUrl} className={styles.retryBtn}>
+        Retry
+      </button>
+    </div>
+  )
+
+  return (
+    <div className={styles.videoWrapper} onContextMenu={e => e.preventDefault()}>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        className={styles.video}
+        controls
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
+        playsInline
+      />
+      {/* Watermark overlay */}
+      <div className={styles.watermark}>
+        {studentName} | {studentEmail}
+      </div>
+    </div>
+  )
+}
+
+// ── Main Course Player ────────────────────────────────
 export default function CoursePlayer() {
   const { courseId } = useParams()
-  const { user, userData } = useAuth()
+  const { userData } = useAuth()
   const navigate = useNavigate()
   const [course, setCourse] = useState(null)
-  const [activeLesson, setActiveLesson] = useState(null)
-  const [openChapters, setOpenChapters] = useState({})
-  const [completedLessons, setCompletedLessons] = useState(new Set())
   const [loading, setLoading] = useState(true)
+  const [activeVideo, setActiveVideo] = useState(null)
+  const [expandedChapter, setExpandedChapter] = useState(0)
+  const [completing, setCompleting] = useState(false)
 
-  // Load Course and Syllabus data from Firestore
   useEffect(() => {
     const fetchCourse = async () => {
-      // Access check
       if (!userData?.hasAccess || !userData?.enrolledCourseId) {
         navigate('/courses')
         return
@@ -32,12 +163,13 @@ export default function CoursePlayer() {
         if (snap.exists()) {
           const data = { id: snap.id, ...snap.data() }
           setCourse(data)
-          // Auto expand first chapter and select first lesson
-          if (data.chapters?.length > 0) {
-            setOpenChapters({ [data.chapters[0].id]: true })
-            if (data.chapters[0].lessons?.length > 0) {
-              setActiveLesson(data.chapters[0].lessons[0])
-            }
+          // Auto select first video
+          if (data.chapters?.[0]?.videos?.[0]) {
+            setActiveVideo({
+              ...data.chapters[0].videos[0],
+              chapterIdx: 0,
+              videoIdx: 0,
+            })
           }
         }
       } catch (err) {
@@ -48,265 +180,252 @@ export default function CoursePlayer() {
     if (userData) fetchCourse()
   }, [userData])
 
-  // Synchronize completed lessons state from user Firestore metadata
-  useEffect(() => {
-    if (userData?.completedChapters) {
-      setCompletedLessons(new Set(userData.completedChapters))
-    }
-  }, [userData])
+  // Mark video complete
+  const markComplete = async () => {
+    if (!activeVideo || !course || !userData) return
+    setCompleting(true)
+    try {
+      const auth = getAuth()
+      const completedKey = `${activeVideo.chapterIdx}_${activeVideo.videoIdx}`
+      const existingCompleted = userData.completedChapters || []
+      if (!existingCompleted.includes(completedKey)) {
+        const completedSet = new Set(existingCompleted)
+        completedSet.add(completedKey)
+        const completed = Array.from(completedSet)
+        const userRef = doc(db, 'users', auth.currentUser.uid)
 
-  const toggleChapter = (chapterId) => {
-    setOpenChapters(prev => ({
-      ...prev,
-      [chapterId]: !prev[chapterId]
-    }))
+        // Calculate progress
+        const totalVideos = course.chapters.reduce(
+          (sum, ch) => sum + (ch.videos?.length || 0), 0
+        )
+        
+        // Cap progress at 100%
+        const progress = totalVideos > 0
+          ? Math.min(Math.round((completed.length / totalVideos) * 100), 100)
+          : 0
+
+        await updateDoc(userRef, {
+          completedChapters: completed,
+          progress,
+        })
+      }
+
+      // Go to next video
+      goToNext()
+    } catch (err) {
+      console.error('Mark complete error:', err)
+    }
+    setCompleting(false)
   }
 
-  // Toggle completion status in state and Firestore
-  const handleToggleComplete = async (lessonId) => {
-    if (!user) return
+  const goToNext = () => {
+    if (!course || !activeVideo) return
+    const { chapterIdx, videoIdx } = activeVideo
+    const chapter = course.chapters[chapterIdx]
 
-    const userRef = doc(db, 'users', user.uid)
-    const isCompletedNow = completedLessons.has(lessonId)
+    if (videoIdx < (chapter.videos?.length || 0) - 1) {
+      // Next video in same chapter
+      setActiveVideo({
+        ...chapter.videos[videoIdx + 1],
+        chapterIdx,
+        videoIdx: videoIdx + 1,
+      })
+    } else if (chapterIdx < course.chapters.length - 1) {
+      // First video of next chapter
+      setExpandedChapter(chapterIdx + 1)
+      setActiveVideo({
+        ...course.chapters[chapterIdx + 1].videos[0],
+        chapterIdx: chapterIdx + 1,
+        videoIdx: 0,
+      })
+    }
+  }
 
+  const goToPrev = () => {
+    if (!course || !activeVideo) return
+    const { chapterIdx, videoIdx } = activeVideo
+
+    if (videoIdx > 0) {
+      const chapter = course.chapters[chapterIdx]
+      setActiveVideo({
+        ...chapter.videos[videoIdx - 1],
+        chapterIdx,
+        videoIdx: videoIdx - 1,
+      })
+    } else if (chapterIdx > 0) {
+      const prevChapter = course.chapters[chapterIdx - 1]
+      const lastVideoIdx = (prevChapter.videos?.length || 1) - 1
+      setExpandedChapter(chapterIdx - 1)
+      setActiveVideo({
+        ...prevChapter.videos[lastVideoIdx],
+        chapterIdx: chapterIdx - 1,
+        videoIdx: lastVideoIdx,
+      })
+    }
+  }
+
+  const isCompleted = (chapterIdx, videoIdx) => {
+    const key = `${chapterIdx}_${videoIdx}`
+    return userData?.completedChapters?.includes(key)
+  }
+
+  const openPdf = async (pdfPublicId) => {
     try {
-      if (isCompletedNow) {
-        // Remove from completed
-        await updateDoc(userRef, {
-          completedChapters: arrayRemove(lessonId)
-        })
-        completedLessons.delete(lessonId)
-        setCompletedLessons(new Set(completedLessons))
-      } else {
-        // Add to completed
-        await updateDoc(userRef, {
-          completedChapters: arrayUnion(lessonId)
-        })
-        completedLessons.add(lessonId)
-        setCompletedLessons(new Set(completedLessons))
+      const auth = getAuth()
+      const token = await auth.currentUser.getIdToken()
+      const encodedId = encodeURIComponent(pdfPublicId)
+
+      const res = await fetch(`${BACKEND_URL}/api/video/signed-pdf/${encodedId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (data.success) {
+        window.open(data.url, '_blank')
       }
     } catch (err) {
-      console.error('Failed to sync completion status to Firestore:', err)
-      // Optimistic local state toggle in case database is not writeable
-      if (isCompletedNow) {
-        completedLessons.delete(lessonId)
-      } else {
-        completedLessons.add(lessonId)
-      }
-      setCompletedLessons(new Set(completedLessons))
+      console.error('PDF open error:', err)
     }
   }
 
-  // Automatic transition to next lesson on video end
-  const handleVideoEnded = () => {
-    if (!course || !activeLesson) return
+  if (loading) return (
+    <div className={styles.loading}>Loading course...</div>
+  )
+  if (!course) return (
+    <div className={styles.loading}>Course not found.</div>
+  )
 
-    // Auto mark complete on video end
-    if (!completedLessons.has(activeLesson.id)) {
-      handleToggleComplete(activeLesson.id)
-    }
-
-    // Find current indices
-    let found = false
-    for (let c = 0; c < course.chapters.length; c++) {
-      const chapter = course.chapters[c]
-      for (let l = 0; l < chapter.lessons.length; l++) {
-        const lesson = chapter.lessons[l]
-        if (found) {
-          setActiveLesson(lesson)
-          setOpenChapters(prev => ({ ...prev, [chapter.id]: true }))
-          return
-        }
-        if (lesson.id === activeLesson.id) {
-          found = true
-        }
-      }
-    }
-  }
-
-  const navigateLesson = (direction) => {
-    if (!course || !activeLesson) return
-
-    // Build flat array of lessons
-    const flatLessons = []
-    course.chapters.forEach(ch => flatLessons.push(...ch.lessons))
-
-    const currentIndex = flatLessons.findIndex(l => l.id === activeLesson.id)
-    if (direction === 'next' && currentIndex < flatLessons.length - 1) {
-      setActiveLesson(flatLessons[currentIndex + 1])
-    } else if (direction === 'prev' && currentIndex > 0) {
-      setActiveLesson(flatLessons[currentIndex - 1])
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className={styles.loading}>
-        <div className={styles.spinner} />
-      </div>
-    )
-  }
-
-  if (!course) {
-    return (
-      <div className={styles.error}>
-        <AlertCircle size={40} className={styles.errorIcon} />
-        <h3>Course Not Found</h3>
-        <p>We could not retrieve the details for this course.</p>
-        <Link to="/courses" className={styles.backBtn}>Back to Courses</Link>
-      </div>
-    )
-  }
-
-  // Calculate stats
-  const totalLessons = course.chapters.reduce((sum, ch) => sum + ch.lessons.length, 0)
-  const completedLessonsCount = Array.from(completedLessons).filter(id => {
-    // Check if the completed id belongs to current course lessons
-    return course.chapters.some(ch => ch.lessons.some(l => l.id === id))
-  }).length
-  const progressPercent = totalLessons > 0 ? Math.round((completedLessonsCount / totalLessons) * 100) : 0
+  const totalVideos = course.chapters?.reduce(
+    (sum, ch) => sum + (ch.videos?.length || 0), 0
+  ) || 0
+  const completedCount = Math.min(
+    userData?.completedChapters?.length || 0,
+    totalVideos
+  )
+  const progress = totalVideos > 0
+    ? Math.min(Math.round((completedCount / totalVideos) * 100), 100)
+    : 0
 
   return (
     <div className={styles.page}>
-      {/* Back button header */}
-      <div className={styles.topHeader}>
-        <Link to="/courses" className={styles.backLink}>
-          <ChevronLeft size={16} />
-          <span>Back to Courses</span>
+      {/* Header */}
+      <div className={styles.header}>
+        <Link to="/courses" className={styles.backBtn}>
+          <ArrowLeft size={16} /> Back to Courses
         </Link>
-        <div className={styles.courseMeta}>
-          <span className={styles.courseTitleHeader}>{course.title}</span>
-          <span className={styles.progressCounter}>
-            {completedLessonsCount} / {totalLessons} Lessons ({progressPercent}%)
+        <div className={styles.headerRight}>
+          <span className={styles.courseTitle}>{course.title}</span>
+          <span className={styles.progressText}>
+            {Math.min(completedCount, totalVideos)} / {totalVideos} Lessons ({progress}%)
           </span>
         </div>
       </div>
 
-      {/* Primary two-pane theater layout */}
       <div className={styles.layout}>
-        
-        {/* Left column: Active Media Player viewport */}
-        <div className={styles.playerContainer}>
-          <div className={styles.mediaViewport}>
-            {activeLesson ? (
-              activeLesson.type === 'video' ? (
-                <VideoPlayer
-                  url={activeLesson.url}
-                  title={activeLesson.title}
-                  onEnded={handleVideoEnded}
-                />
-              ) : (
-                <PDFViewer
-                  url={activeLesson.url}
-                  title={activeLesson.title}
-                />
-              )
-            ) : (
-              <div className={styles.noActiveLesson}>
-                <BookOpen size={48} className={styles.placeholderIcon} />
-                <p>Select a lesson from the curriculum sidebar to begin learning.</p>
+        {/* Left — Video Player */}
+        <div className={styles.playerSection}>
+          {activeVideo ? (
+            <>
+              <SecureVideoPlayer
+                publicId={activeVideo.videoUrl}
+                studentName={userData?.name || 'Student'}
+                studentEmail={userData?.email || ''}
+              />
+              <div className={styles.videoInfo}>
+                <h2 className={styles.videoTitle}>{activeVideo.title}</h2>
+                {activeVideo.pdfUrl && (
+                  <button
+                    className={styles.pdfBtn}
+                    onClick={() => openPdf(activeVideo.pdfUrl)}
+                  >
+                    <FileText size={15} />
+                    View Study Material
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-
-          {/* Player footer control buttons */}
-          {activeLesson && (
-            <div className={styles.playerFooter}>
-              <div className={styles.lessonMeta}>
-                <h3 className={styles.activeTitle}>{activeLesson.title}</h3>
-                <span className={styles.activeType}>
-                  Type: {activeLesson.type === 'video' ? 'Lecture Video' : 'PDF Study Guide'}
-                </span>
-              </div>
-              <div className={styles.navRow}>
-                <button
-                  onClick={() => navigateLesson('prev')}
-                  className={styles.navBtn}
-                  disabled={
-                    !course ||
-                    activeLesson.id === course.chapters[0].lessons[0].id
-                  }
-                >
+              <div className={styles.navButtons}>
+                <button className={styles.prevBtn} onClick={goToPrev}>
                   Previous
                 </button>
-
                 <button
-                  onClick={() => handleToggleComplete(activeLesson.id)}
-                  className={`${styles.completeToggleBtn} ${completedLessons.has(activeLesson.id) ? styles.isCompleted : ''}`}
+                  className={styles.completeBtn}
+                  onClick={markComplete}
+                  disabled={completing}
                 >
-                  <CheckCircle size={15} />
-                  <span>{completedLessons.has(activeLesson.id) ? 'Completed' : 'Mark Complete'}</span>
+                  <CheckCircle size={16} />
+                  {completing ? 'Saving...' : 'Mark Complete'}
                 </button>
-
-                <button
-                  onClick={() => navigateLesson('next')}
-                  className={styles.navBtn}
-                  disabled={
-                    !course ||
-                    activeLesson.id === course.chapters[course.chapters.length - 1].lessons[course.chapters[course.chapters.length - 1].lessons.length - 1].id
-                  }
-                >
+                <button className={styles.nextBtn} onClick={goToNext}>
                   Next
                 </button>
               </div>
+            </>
+          ) : (
+            <div className={styles.selectPrompt}>
+              <Play size={40} className={styles.promptIcon} />
+              <p>Select a lesson to start watching</p>
             </div>
           )}
         </div>
 
-        {/* Right column: Interactive Curriculum Accordion Sidebar */}
-        <aside className={styles.sidebar}>
-          <h3 className={styles.sidebarTitle}>Course Curriculum</h3>
-          <div className={styles.progressWrap}>
-            <div className={styles.progressLabels}>
-              <span>Your Progress</span>
-              <span>{progressPercent}%</span>
-            </div>
+        {/* Right — Curriculum */}
+        <aside className={styles.curriculum}>
+          <div className={styles.curriculumHeader}>
+            <h3>Course Curriculum</h3>
             <div className={styles.progressBar}>
-              <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+              <div
+                className={styles.progressFill}
+                style={{ width: `${progress}%` }}
+              />
             </div>
+            <span className={styles.progressLabel}>
+              Your Progress {progress}%
+            </span>
           </div>
 
-          <div className={styles.chaptersList}>
-            {course.chapters.map((chapter) => {
-              const isOpen = !!openChapters[chapter.id]
-              return (
-                <div key={chapter.id} className={styles.chapterGroup}>
-                  {/* Chapter header trigger toggle */}
-                  <button
-                    className={styles.chapterTrigger}
-                    onClick={() => toggleChapter(chapter.id)}
-                  >
-                    <span className={styles.chapterTitle}>{chapter.title}</span>
-                    {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </button>
+          <div className={styles.chapterList}>
+            {course.chapters?.map((chapter, ci) => (
+              <div key={ci} className={styles.chapterItem}>
+                <button
+                  className={`${styles.chapterBtn} ${expandedChapter === ci ? styles.expanded : ''}`}
+                  onClick={() => setExpandedChapter(expandedChapter === ci ? null : ci)}
+                >
+                  <span className={styles.chapterTitle}>{chapter.title}</span>
+                  <ChevronDown size={14} className={styles.chevron} />
+                </button>
 
-                  {/* Chapter lessons collapsible content */}
-                  {isOpen && (
-                    <div className={styles.lessonsContainer}>
-                      {chapter.lessons.map((lesson) => {
-                        const isLActive = activeLesson?.id === lesson.id
-                        const isLCompleted = completedLessons.has(lesson.id)
-
-                        return (
-                          <ChapterItem
-                            key={lesson.id}
-                            lesson={lesson}
-                            isActive={isLActive}
-                            isCompleted={isLCompleted}
-                            isLocked={false} // Permits free learning exploration
-                            onSelect={setActiveLesson}
-                            onToggleComplete={handleToggleComplete}
-                          />
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+                {expandedChapter === ci && (
+                  <div className={styles.videoList}>
+                    {chapter.videos?.map((video, vi) => (
+                      <button
+                        key={vi}
+                        className={`${styles.videoBtn} ${
+                          activeVideo?.chapterIdx === ci &&
+                          activeVideo?.videoIdx === vi
+                            ? styles.activeVideo : ''
+                        }`}
+                        onClick={() => setActiveVideo({
+                          ...video, chapterIdx: ci, videoIdx: vi
+                        })}
+                      >
+                        <div className={styles.videoBtnLeft}>
+                          {isCompleted(ci, vi) ? (
+                            <CheckCircle size={14} className={styles.completedIcon} />
+                          ) : (
+                            <ChevronRight size={14} />
+                          )}
+                          <span>{video.title}</span>
+                        </div>
+                        {video.duration && (
+                          <span className={styles.duration}>{video.duration}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </aside>
-
       </div>
     </div>
   )

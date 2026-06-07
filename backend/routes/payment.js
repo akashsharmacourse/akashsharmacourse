@@ -59,6 +59,110 @@ router.post('/save-lead', async (req, res) => {
   }
 })
 
+// ── Verify Payment ────────────────────────────────────
+router.post('/verify', async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      name, email, phone, type
+    } = req.body
+
+    // Verify signature
+    const body = razorpay_order_id + '|' + razorpay_payment_id
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest('hex')
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Invalid signature' })
+    }
+
+    // Signature valid — process payment
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+
+    if (type === 'course') {
+      const sheetId = process.env.GOOGLE_SHEET_ID_COURSE
+
+      // Update lead status
+      await updatePaymentStatus(sheetId, 'Leads', email, 'paid')
+
+      // Add to enrollments
+      await appendToSheet(sheetId, 'Enrollments', [
+        timestamp, name, email, phone, '₹9,999', 'active'
+      ])
+
+      // Generate temp password
+      const tempPassword = `Akash@${Math.floor(1000 + Math.random() * 9000)}`
+
+      // Create Firebase user
+      let userRecord
+      try {
+        userRecord = await auth.createUser({
+          email,
+          password: tempPassword,
+          displayName: name,
+        })
+      } catch (e) {
+        userRecord = await auth.getUserByEmail(email)
+        await auth.updateUser(userRecord.uid, { password: tempPassword })
+      }
+
+      // Store in Firestore
+      const courseSnap = await db.collection('courses')
+        .where('published', '==', true)
+        .limit(1)
+        .get()
+
+      const courseId = courseSnap.empty ? '' : courseSnap.docs[0].id
+
+      await db.collection('users').doc(userRecord.uid).set({
+        name,
+        email,
+        phone,
+        hasAccess: true,
+        enrolledCourseId: courseId,
+        completedChapters: [],
+        progress: 0,
+        watchTimeMinutes: 0,
+        createdAt: new Date().toISOString(),
+        paymentAmount: 9999,
+        paymentId: razorpay_payment_id,
+      }, { merge: true })
+
+      // Send welcome email
+      await sendWelcomeEmail({
+        to: email,
+        name,
+        email,
+        password: tempPassword,
+        loginUrl: process.env.DASHBOARD_URL || 'http://localhost:5173/login',
+      })
+    }
+
+    if (type === '1on1') {
+      const sheetId = process.env.GOOGLE_SHEET_ID_ONEONONE
+
+      await appendToSheet(sheetId, '1on1Enrollments', [
+        timestamp, name, email, phone, '₹24,999', 'paid'
+      ])
+
+      await sendOneOnOneConfirmationEmail({
+        to: email,
+        name,
+        calendlyLink: process.env.CALENDLY_LINK,
+      })
+    }
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Verify error:', err)
+    res.status(500).json({ success: false, error: 'Verification failed' })
+  }
+})
+
 // ── Razorpay Webhook ──────────────────────────────────
 router.post('/webhook', async (req, res) => {
   try {
@@ -114,11 +218,21 @@ router.post('/webhook', async (req, res) => {
         }
 
         // Store in Firestore
+        const courseSnap = await db.collection('courses')
+          .where('published', '==', true)
+          .limit(1)
+          .get()
+        const courseId = courseSnap.empty ? '' : courseSnap.docs[0].id
+
         await db.collection('users').doc(userRecord.uid).set({
           name,
           email,
           phone,
-          enrolledCourses: [],
+          hasAccess: true,
+          enrolledCourseId: courseId,
+          completedChapters: [],
+          progress: 0,
+          watchTimeMinutes: 0,
           createdAt: new Date().toISOString(),
           paymentAmount: amount,
           paymentId: payment.id,
@@ -130,7 +244,7 @@ router.post('/webhook', async (req, res) => {
           name,
           email,
           password: tempPassword,
-          loginUrl: `${process.env.CLIENT_URL}/login`,
+          loginUrl: process.env.DASHBOARD_URL || 'http://localhost:5173/login',
         })
       }
 

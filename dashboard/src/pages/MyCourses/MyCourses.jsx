@@ -57,11 +57,11 @@ export default function MyCourses() {
                   <div className={styles.progressBar}>
                     <div
                       className={styles.progressFill}
-                      style={{ width: `${userData?.progress || 0}%` }}
+                      style={{ width: `${Math.min(userData?.progress || 0, 100)}%` }}
                     />
                   </div>
                   <span className={styles.progressText}>
-                    {userData?.progress || 0}%
+                    {Math.min(userData?.progress || 0, 100)}% complete
                   </span>
                 </div>
                 <ChevronRight size={18} className={styles.arrow} />

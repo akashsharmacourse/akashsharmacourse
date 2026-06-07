@@ -3,10 +3,11 @@ import { Shield, Lock } from 'lucide-react'
 import { formData } from '../../data/data.js'
 import styles from './EnrollForm.module.css'
 
-export default function EnrollForm({ type = 'course', onSubmit }) {
+export default function EnrollForm({ type = 'course', onSubmit, loading: externalLoading }) {
   const [form, setForm] = useState({ name: '', email: '', phone: '' })
   const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
+  const [internalLoading, setInternalLoading] = useState(false)
+  const loading = externalLoading || internalLoading
 
   const info = type === 'course' ? formData.course : formData.oneOnOne
 
@@ -30,9 +31,9 @@ export default function EnrollForm({ type = 'course', onSubmit }) {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
-    setLoading(true)
+    setInternalLoading(true)
     await onSubmit(form)
-    setLoading(false)
+    setInternalLoading(false)
   }
 
   return (

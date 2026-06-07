@@ -10,6 +10,55 @@ import Modal from '../../components/Modal/Modal.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
 import styles from './CourseDetail.module.css'
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+
+const uploadToCloudinary = async (file, resourceType = 'video') => {
+  try {
+    // Get upload signature from backend
+    const signRes = await fetch(`${BACKEND_URL}/api/upload/sign`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
+      },
+      body: JSON.stringify({ folder: 'courses', resource_type: resourceType }),
+    })
+    const signData = await signRes.json()
+
+    // Upload to Cloudinary
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('signature', signData.signature)
+    formData.append('timestamp', signData.timestamp)
+    formData.append('api_key', signData.apiKey)
+    formData.append('folder', signData.folder)
+
+    const uploadRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${signData.cloudName}/${resourceType}/upload`,
+      { method: 'POST', body: formData }
+    )
+    const uploadData = await uploadRes.json()
+    console.log('Cloudinary full response:', uploadData)
+
+    if (uploadData.error) {
+      console.error('Cloudinary error:', uploadData.error)
+      throw new Error(uploadData.error.message)
+    }
+
+    if (!uploadData.public_id) {
+      console.error('No public_id in response:', uploadData)
+      throw new Error('Upload failed — no public_id returned')
+    }
+
+    console.log('public_id:', uploadData.public_id)
+    return uploadData.public_id
+
+  } catch (err) {
+    console.error('Upload error:', err)
+    throw err
+  }
+}
+
 export default function CourseDetail() {
   const { courseId } = useParams()
   const [course, setCourse] = useState(null)
@@ -25,7 +74,16 @@ export default function CourseDetail() {
   // Lesson Modal
   const [lessonModalOpen, setLessonModalOpen] = useState(false)
   const [activeChapterId, setActiveChapterId] = useState(null)
-  const [lessonForm, setLessonForm] = useState({ title: '', type: 'video', url: '', duration: '' })
+  
+  // videoForm State
+  const [videoForm, setVideoForm] = useState({
+    title: '',
+    videoFile: null,  // File object
+    pdfFile: null,    // File object
+    duration: '',
+  })
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
 
   // Deletion States
   const [deleteChapterId, setDeleteChapterId] = useState(null)
@@ -70,7 +128,7 @@ export default function CourseDetail() {
       const newChapter = {
         id: `chap_${Date.now()}`,
         title: chapterForm.title,
-        lessons: []
+        videos: [] // updated from lessons to videos
       }
       const updatedChapters = [...(course.chapters || []), newChapter]
 
@@ -101,45 +159,68 @@ export default function CourseDetail() {
     }
   }
 
-  // --- Lesson Actions ---
+  // --- Lesson/Video Actions ---
   const openAddLesson = (chapterId) => {
     setActiveChapterId(chapterId)
-    setLessonForm({ title: '', type: 'video', url: '', duration: '' })
+    setVideoForm({ title: '', videoFile: null, pdfFile: null, duration: '' })
+    setUploadProgress('')
     setLessonModalOpen(true)
   }
 
-  const handleAddLesson = async () => {
-    if (!lessonForm.title.trim()) return
+  const handleAddVideo = async () => {
+    if (!videoForm.title.trim() || !videoForm.videoFile) return
     setSaving(true)
+    setUploading(true)
+
     try {
-      const newLesson = {
-        id: `les_${Date.now()}`,
-        title: lessonForm.title,
-        type: lessonForm.type,
-        url: lessonForm.url,
-        duration: lessonForm.type === 'video' ? lessonForm.duration || '0:00' : ''
+      // Upload video to Cloudinary
+      setUploadProgress('Uploading video...')
+      const videoPublicId = await uploadToCloudinary(videoForm.videoFile, 'video')
+
+      // Upload PDF if exists
+      let pdfPublicId = ''
+      if (videoForm.pdfFile) {
+        setUploadProgress('Uploading PDF...')
+        pdfPublicId = await uploadToCloudinary(videoForm.pdfFile, 'raw')
       }
 
-      const updatedChapters = course.chapters.map(chap => {
-        if (chap.id === activeChapterId) {
-          return {
-            ...chap,
-            lessons: [...(chap.lessons || []), newLesson]
-          }
-        }
-        return chap
-      })
+      console.log('videoPublicId:', videoPublicId)
+      console.log('pdfPublicId:', pdfPublicId)
 
-      await updateDoc(doc(db, 'courses', course.id), {
-        chapters: updatedChapters
-      })
+      setUploadProgress('Saving...')
+      const chapters = [...(course.chapters || [])]
+      const activeChapterIdx = chapters.findIndex(chap => chap.id === activeChapterId)
+      if (activeChapterIdx === -1) {
+        throw new Error('Active chapter not found')
+      }
 
+      const newVideo = {
+        id: `vid_${Date.now()}`,
+        title: videoForm.title,
+        videoUrl: videoPublicId || '',
+        pdfUrl: pdfPublicId || '',
+        duration: videoForm.duration || '',
+        completed: false,
+        createdAt: new Date().toISOString(),
+      }
+      
+      chapters[activeChapterIdx].videos = [
+        ...(chapters[activeChapterIdx].videos || []),
+        newVideo,
+      ]
+      
+      await updateDoc(doc(db, 'courses', courseId), { chapters })
+      
       setLessonModalOpen(false)
+      setVideoForm({ title: '', videoFile: null, pdfFile: null, duration: '' })
+      setUploadProgress('')
       fetchCourseDetail()
     } catch (err) {
-      console.error('Add lesson error:', err)
+      console.error('Add video error:', err)
+      setUploadProgress('Upload failed. Try again.')
     }
     setSaving(false)
+    setUploading(false)
   }
 
   const handleDeleteLesson = async () => {
@@ -150,7 +231,7 @@ export default function CourseDetail() {
         if (chap.id === chapterId) {
           return {
             ...chap,
-            lessons: chap.lessons.filter(l => l.id !== lessonId)
+            videos: (chap.videos || []).filter(v => v.id !== lessonId)
           }
         }
         return chap
@@ -163,7 +244,7 @@ export default function CourseDetail() {
       setDeleteLessonInfo(null)
       fetchCourseDetail()
     } catch (err) {
-      console.error('Delete lesson error:', err)
+      console.error('Delete video error:', err)
     }
   }
 
@@ -182,7 +263,7 @@ export default function CourseDetail() {
     )
   }
 
-  const totalLessons = course.chapters?.reduce((sum, ch) => sum + (ch.lessons?.length || 0), 0) || 0
+  const totalLessons = course.chapters?.reduce((sum, ch) => sum + (ch.videos?.length || 0), 0) || 0
 
   return (
     <div className={styles.page}>
@@ -234,14 +315,14 @@ export default function CourseDetail() {
                       {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       <span className={styles.chapterTitle}>{chapter.title}</span>
                       <span className={styles.lessonCount}>
-                        {chapter.lessons?.length || 0} lessons
+                        {chapter.videos?.length || 0} videos
                       </span>
                     </button>
                     <div className={styles.chapterActions}>
                       <button
                         className={styles.addLessonBtn}
                         onClick={() => openAddLesson(chapter.id)}
-                        title="Add Lesson"
+                        title="Add Video"
                       >
                         <Plus size={14} /> Lesson
                       </button>
@@ -258,25 +339,27 @@ export default function CourseDetail() {
                   {/* Chapter lessons list */}
                   {isOpen && (
                     <div className={styles.lessonsContainer}>
-                      {chapter.lessons?.length > 0 ? (
-                        chapter.lessons.map((lesson) => {
-                          const Icon = lesson.type === 'video' ? Video : FileText
+                      {chapter.videos?.length > 0 ? (
+                        chapter.videos.map((video) => {
                           return (
-                            <div key={lesson.id} className={styles.lessonItem}>
+                            <div key={video.id} className={styles.lessonItem}>
                               <div className={styles.lessonLeft}>
-                                <Icon size={16} className={styles.lessonIcon} />
-                                <span className={styles.lessonTitle}>{lesson.title}</span>
-                                {lesson.type === 'video' && (
-                                  <span className={styles.durationTag}>{lesson.duration}</span>
+                                <Video size={16} className={styles.lessonIcon} />
+                                <span className={styles.lessonTitle}>{video.title}</span>
+                                {video.duration && (
+                                  <span className={styles.durationTag}>{video.duration}</span>
                                 )}
                               </div>
                               <div className={styles.lessonRight}>
-                                <span className={styles.typeBadge}>
-                                  {lesson.type === 'video' ? 'Video' : 'PDF'}
-                                </span>
+                                {video.pdfUrl && (
+                                  <span className={styles.typeBadge} style={{ background: 'var(--accent-dim)', color: 'var(--accent)', marginRight: 8, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                    <FileText size={12} /> PDF
+                                  </span>
+                                )}
+                                <span className={styles.typeBadge}>Video</span>
                                 <button
                                   className={styles.lessonTrashBtn}
-                                  onClick={() => setDeleteLessonInfo({ chapterId: chapter.id, lessonId: lesson.id })}
+                                  onClick={() => setDeleteLessonInfo({ chapterId: chapter.id, lessonId: video.id })}
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -286,7 +369,7 @@ export default function CourseDetail() {
                         })
                       ) : (
                         <div className={styles.emptyLessons}>
-                          No lessons added in this chapter yet. Click "+ Lesson" above to add.
+                          No videos added in this chapter yet. Click "+ Lesson" above to add.
                         </div>
                       )}
                     </div>
@@ -337,56 +420,82 @@ export default function CourseDetail() {
       {/* Add Lesson Modal */}
       <Modal
         isOpen={lessonModalOpen}
-        onClose={() => setLessonModalOpen(false)}
-        title="Add Lesson Material"
+        onClose={() => !uploading && setLessonModalOpen(false)}
+        title="Add Secure Lesson"
       >
         <div className={styles.form}>
           <div className={styles.field}>
             <label className={styles.label}>Lesson Title *</label>
             <input
               className={styles.input}
-              value={lessonForm.title}
-              onChange={e => setLessonForm(p => ({ ...p, title: e.target.value }))}
+              value={videoForm.title}
+              onChange={e => setVideoForm(p => ({ ...p, title: e.target.value }))}
               placeholder="e.g. 1.1 Support and Resistance Basics"
+              disabled={uploading}
             />
           </div>
+
           <div className={styles.field}>
-            <label className={styles.label}>Resource Type</label>
-            <select
-              className={styles.select}
-              value={lessonForm.type}
-              onChange={e => setLessonForm(p => ({ ...p, type: e.target.value }))}
-            >
-              <option value="video">Lecture Video</option>
-              <option value="pdf">PDF Study Guide</option>
-            </select>
+            <label className={styles.label}>Video File * (MP4)</label>
+            <input
+              type="file"
+              accept="video/mp4,video/*"
+              className={styles.input}
+              onChange={e => setVideoForm(p => ({ ...p, videoFile: e.target.files[0] }))}
+              disabled={uploading}
+            />
+            {videoForm.videoFile && (
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                Selected: {videoForm.videoFile.name}
+              </span>
+            )}
           </div>
+
           <div className={styles.field}>
-            <label className={styles.label}>Resource URL *</label>
+            <label className={styles.label}>PDF Material (optional)</label>
+            <input
+              type="file"
+              accept=".pdf"
+              className={styles.input}
+              onChange={e => setVideoForm(p => ({ ...p, pdfFile: e.target.files[0] }))}
+              disabled={uploading}
+            />
+            {videoForm.pdfFile && (
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                Selected: {videoForm.pdfFile.name}
+              </span>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Duration (MM:SS)</label>
             <input
               className={styles.input}
-              value={lessonForm.url}
-              onChange={e => setLessonForm(p => ({ ...p, url: e.target.value }))}
-              placeholder={lessonForm.type === 'video' ? 'Video direct mp4 URL' : 'PDF Document URL'}
+              value={videoForm.duration}
+              onChange={e => setVideoForm(p => ({ ...p, duration: e.target.value }))}
+              placeholder="e.g. 12:45"
+              disabled={uploading}
             />
           </div>
-          {lessonForm.type === 'video' && (
-            <div className={styles.field}>
-              <label className={styles.label}>Duration (MM:SS)</label>
-              <input
-                className={styles.input}
-                value={lessonForm.duration}
-                onChange={e => setLessonForm(p => ({ ...p, duration: e.target.value }))}
-                placeholder="e.g. 12:45"
-              />
+
+          {uploadProgress && (
+            <div style={{
+              padding: '10px 14px',
+              background: 'var(--accent-dim)',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: 13,
+              color: 'var(--accent)',
+            }}>
+              {uploadProgress}
             </div>
           )}
+
           <div className={styles.modalActions}>
-            <button className={styles.cancelBtn} onClick={() => setLessonModalOpen(false)}>
+            <button className={styles.cancelBtn} onClick={() => setLessonModalOpen(false)} disabled={uploading}>
               Cancel
             </button>
-            <button className={styles.saveBtn} onClick={handleAddLesson} disabled={saving}>
-              {saving ? 'Adding...' : 'Add Lesson'}
+            <button className={styles.saveBtn} onClick={handleAddVideo} disabled={saving || uploading}>
+              {uploading ? 'Uploading...' : 'Add Lesson'}
             </button>
           </div>
         </div>

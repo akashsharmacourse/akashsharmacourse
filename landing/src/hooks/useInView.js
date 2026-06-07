@@ -7,15 +7,12 @@ import { useEffect, useRef, useState } from 'react';
  */
 export function useInView(threshold = 0.15) {
   const ref = useRef(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(() => {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
 
   useEffect(() => {
-    // Accessibility: bypass intersection reveal animations if users prefer reduced motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      setInView(true);
-      return;
-    }
+    if (inView) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -30,7 +27,7 @@ export function useInView(threshold = 0.15) {
     if (ref.current) observer.observe(ref.current);
 
     return () => observer.disconnect();
-  }, [threshold]);
+  }, [threshold, inView]);
 
   return [ref, inView];
 }

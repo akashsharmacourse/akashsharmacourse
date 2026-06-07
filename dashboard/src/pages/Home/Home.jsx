@@ -9,11 +9,17 @@ const iconMap = { BookOpen, CheckCircle, Clock, TrendingUp }
 export default function Home() {
   const { userData } = useAuth()
 
+  const totalVideos = 1 // Will be dynamic later
+  const completedCount = userData?.completedChapters
+    ? new Set(userData.completedChapters).size
+    : 0
+  const progress = Math.min(userData?.progress || 0, 100)
+
   const stats = [
     { icon: 'BookOpen', label: 'Enrolled Courses', value: userData?.hasAccess ? 1 : 0 },
-    { icon: 'CheckCircle', label: 'Completed Chapters', value: userData?.completedChapters?.length || 0 },
+    { icon: 'CheckCircle', label: 'Completed Chapters', value: Math.min(completedCount, totalVideos) },
     { icon: 'Clock', label: 'Watch Time', value: `${userData?.watchTimeMinutes || 0} mins` },
-    { icon: 'TrendingUp', label: 'Overall Progress', value: `${userData?.progress || 0}%` },
+    { icon: 'TrendingUp', label: 'Overall Progress', value: `${progress}%` },
   ]
 
   return (
@@ -56,13 +62,13 @@ export default function Home() {
               <div className={styles.courseInfo}>
                 <span className={styles.courseTitle}>Stock Market Mastery Programme</span>
                 <span className={styles.courseProgress}>
-                  {userData?.progress || 0}% complete
+                  {Math.min(userData?.progress || 0, 100)}% complete
                 </span>
               </div>
               <div className={styles.progressBar}>
                 <div
                   className={styles.progressFill}
-                  style={{ width: `${userData?.progress || 0}%` }}
+                  style={{ width: `${Math.min(userData?.progress || 0, 100)}%` }}
                 />
               </div>
               <Link to={`/courses/${userData.enrolledCourseId}`} className={styles.continueBtn}>

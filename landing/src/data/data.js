@@ -436,10 +436,10 @@ export const courseSuccessData = {
       desc: "Login to your dashboard and begin your first lesson today.",
     },
   ],
-  whatsappLink: "#",
+  whatsappLink: "https://wa.me/919650213917",
   whatsappCta: "Join WhatsApp Group",
   loginCta: "Login to Dashboard",
-  loginLink: "/login",
+  loginLink: "https://your-dashboard.vercel.app/login",
   note: "Did not receive email? Check spam folder or contact us.",
 };
 
@@ -465,9 +465,9 @@ export const oneOnOneSuccessData = {
     },
   ],
   calendlyCta: "Book Your Session Slot",
-  calendlyLink: "#",
+  calendlyLink: "https://calendly.com/akash/1on1",
   whatsappCta: "Join WhatsApp Group",
-  whatsappLink: "#",
+  whatsappLink: "https://wa.me/919650213917",
   note: "Session will be scheduled within 48 hours of booking.",
 };
 

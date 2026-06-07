@@ -1,10 +1,10 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Hero from './sections/Hero/Hero';
 import TrustStrip from './sections/TrustStrip/TrustStrip';
 
-import EnrollForm from './components/EnrollForm/EnrollForm';
+import EnrollFormPage from './pages/EnrollFormPage/EnrollFormPage';
 import CourseSuccess from './pages/Success/CourseSuccess';
 import OneOnOneSuccess from './pages/Success/OneOnOneSuccess';
 import ScrollToTop from './components/ScrollToTop/ScrollToTop';
@@ -63,39 +63,6 @@ function HomePage() {
         <CTA />
       </Suspense>
     </>
-  );
-}
-
-function EnrollFormPage({ type }) {
-  const navigate = useNavigate();
-
-  const handleSubmit = async (formData) => {
-    // Save lead to backend
-    try {
-      await fetch('http://localhost:5000/api/payment/save-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, type }),
-      });
-    } catch (err) {
-      console.error('Lead save failed:', err);
-    }
-    // Razorpay will be integrated here later
-    // For now navigate to success page for testing
-    navigate(type === 'course' ? '/success/course' : '/success/1on1');
-  };
-
-  return (
-    <main style={{
-      minHeight: '100svh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '100px 20px 40px',
-      background: 'var(--bg-primary)'
-    }}>
-      <EnrollForm type={type} onSubmit={handleSubmit} />
-    </main>
   );
 }
 
