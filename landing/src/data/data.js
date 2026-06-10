@@ -192,7 +192,24 @@ export const pricingData = {
   cta: "Enroll Now",
   guarantee: "",
   paymentNote: "Secure payment via Razorpay",
-  paymentMethods: ["UPI", "GPay", "PhonePe", "Razorpay"],
+  paymentMethods: [
+    {
+      name: "UPI",
+      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_1_ougu7q.png"
+    },
+    {
+      name: "Google Pay",
+      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_kvopvi.jpg"
+    },
+    {
+      name: "PhonePe",
+      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/images_rc79wj.png"
+    },
+    {
+      name: "Razorpay",
+      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_o4vpwz.png"
+    },
+  ],
 };
 
 // ─── FAQ ──────────────────────────────────────────────
@@ -274,7 +291,7 @@ export const oneOnOneData = {
     subheadline: "Get personalised, one-on-one coaching directly from Akash Sharma — tailored to your trading goals, your portfolio, and your schedule.",
     ctaPrimary: "Book Your Session",
     ctaSecondary: "View Results",
-    image: "/src/assets/AkashSharma.png",
+    image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079548/AkashSharma_pawjik.png",
     imageAlt: "Akash Sharma — Personal Trading Coach",
   },
 
@@ -335,7 +352,24 @@ export const oneOnOneData = {
     cta: "Book Your Session",
     note: "One-time payment. Session scheduled within 48 hours.",
     guarantee: "",
-    paymentMethods: ["UPI", "Visa", "Mastercard", "Razorpay"],
+    paymentMethods: [
+      {
+        name: "UPI",
+        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_1_ougu7q.png"
+      },
+      {
+        name: "Google Pay",
+        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_kvopvi.jpg"
+      },
+      {
+        name: "PhonePe",
+        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/images_rc79wj.png"
+      },
+      {
+        name: "Razorpay",
+        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_o4vpwz.png"
+      },
+    ],
   },
 
   // CALL IMAGES

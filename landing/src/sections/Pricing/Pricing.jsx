@@ -82,26 +82,15 @@ export function Pricing() {
               </div>
               
               <div className={styles.paymentLogos}>
-                {/* UPI */}
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png"
-                  alt="UPI" className={styles.paymentLogo}
-                />
-                {/* GPay */}
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png"
-                  alt="Google Pay" className={styles.paymentLogo}
-                />
-                {/* PhonePe */}
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/PhonePe_Logo.svg/1200px-PhonePe_Logo.svg.png"
-                  alt="PhonePe" className={styles.paymentLogo}
-                />
-                {/* Razorpay */}
-                <img
-                  src="https://razorpay.com/assets/razorpay-glyph.svg"
-                  alt="Razorpay" className={styles.paymentLogo}
-                />
+                {pricingData.paymentMethods.map((method) => (
+                  <div key={method.name} className={styles.paymentCircle}>
+                    <img
+                      src={method.logo}
+                      alt={method.name}
+                      className={styles.paymentLogo}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 

@@ -305,12 +305,22 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+.paymentCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 8px;
+}
 .paymentLogo {
-  height: 24px;
-  width: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  filter: brightness(0) invert(1);
-  opacity: 0.8;
 }
 
 /* ── CALL PROOF ── */

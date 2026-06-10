@@ -79,6 +79,29 @@ html, body {
   padding: 0;
 }
 
+/* Fix mobile webkit tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Fix for buttons and links specifically */
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* Keep focus visible for accessibility */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 html {
   scroll-behavior: smooth;
   background-color: var(--bg-primary);
@@ -137,14 +160,7 @@ a {
   color: inherit;
 }
 
-/* Interactive elements focuses */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-}
+
 
 /* Standard Section Animations */
 .section {
