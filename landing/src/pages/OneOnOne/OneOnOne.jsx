@@ -136,13 +136,32 @@ export default function OneOnOne() {
             </ul>
             <a href="/enroll/1on1" className={styles.pricingCta}>{pricing.cta}</a>
             <p className={styles.pricingNote}>{pricing.note}</p>
-            <p className={styles.guarantee}>
-              <ShieldCheck size={14} /> {pricing.guarantee}
-            </p>
+            {pricing.guarantee && (
+              <p className={styles.guarantee}>
+                <ShieldCheck size={14} /> {pricing.guarantee}
+              </p>
+            )}
             <div className={styles.paymentLogos}>
-              {pricing.paymentMethods.map((m) => (
-                <span key={m} className={styles.paymentBadge}>{m}</span>
-              ))}
+              {/* UPI */}
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/1200px-UPI-Logo-vector.svg.png"
+                alt="UPI" className={styles.paymentLogo}
+              />
+              {/* GPay */}
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png"
+                alt="Google Pay" className={styles.paymentLogo}
+              />
+              {/* PhonePe */}
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/PhonePe_Logo.svg/1200px-PhonePe_Logo.svg.png"
+                alt="PhonePe" className={styles.paymentLogo}
+              />
+              {/* Razorpay */}
+              <img
+                src="https://razorpay.com/assets/razorpay-glyph.svg"
+                alt="Razorpay" className={styles.paymentLogo}
+              />
             </div>
           </div>
         </div>

@@ -11,8 +11,12 @@
   --text-muted: #999999;
   --text-sidebar: #8A8A9A;
   --text-sidebar-active: #FFFFFF;
-  --accent: #C9A84C;
-  --accent-dim: rgba(201,168,76,0.12);
+  --accent: #00C853;
+  --accent-light: #69F0AE;
+  --accent-dim: rgba(0,200,83,0.12);
+  --accent-glow: rgba(0,200,83,0.2);
+  --accent-red: #FF1744;
+  --accent-red-dim: rgba(255,23,68,0.12);
   --danger: #E24B4A;
   --danger-dim: rgba(226,75,74,0.1);
   --success: #1D9E75;

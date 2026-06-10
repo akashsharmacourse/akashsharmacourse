@@ -39,7 +39,7 @@ export default function Login() {
         {/* Logo */}
         <div className={styles.logoWrap}>
           <img
-            src="/logo.png"
+            src="https://res.cloudinary.com/df0gvretu/image/upload/v1781079526/logo_c0qnsv.png"
             alt="AskAkashSharma"
             className={styles.logo}
             onError={(e) => {

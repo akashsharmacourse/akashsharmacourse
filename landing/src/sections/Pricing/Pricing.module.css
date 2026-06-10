@@ -476,3 +476,18 @@
     font-size: var(--text-base);
   }
 }
+
+.paymentLogos {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.paymentLogo {
+  height: 24px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}

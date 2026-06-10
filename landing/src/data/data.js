@@ -75,7 +75,6 @@ export const courseData = {
       "Live session recordings",
       "PDF study materials included",
       "Free updates — forever",
-      "7-day money-back guarantee",
     ],
     originalPrice: "₹15,999",
     currentPrice: "₹9,999",
@@ -91,7 +90,7 @@ export const aboutData = {
   name: "Akash Sharma",
   title: "Professional Stock Market Trader & Coach",
   bio: "A results-driven professional with over a decade of hands-on experience in equities, intraday, and swing trading. I teach one proven strategy in plain language — so anyone can trade with clarity and confidence.",
-  image: "/src/assets/AkashSharma.png",
+  image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079548/AkashSharma_pawjik.png",
   imageAlt: "Akash Sharma — Stock Market Coach",
   imagePlaceholder: false,
   stats: [
@@ -110,7 +109,7 @@ export const pnlProofData = {
   disclaimer: "Past performance is not indicative of future results. Trading involves risk.",
   proof: {
     id: 1,
-    image: "/src/assets/pnl.png",
+    image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079525/pnl_pwgfan.png",
     imageAlt: "Verified PnL Screenshot — Akash Sharma",
     placeholder: false,
   },
@@ -191,9 +190,9 @@ export const pricingData = {
     "Free Updates Forever",
   ],
   cta: "Enroll Now",
-  guarantee: "7-day money-back guarantee — no questions asked.",
+  guarantee: "",
   paymentNote: "Secure payment via Razorpay",
-  paymentMethods: ["UPI", "Visa", "Mastercard", "Razorpay"],
+  paymentMethods: ["UPI", "GPay", "PhonePe", "Razorpay"],
 };
 
 // ─── FAQ ──────────────────────────────────────────────
@@ -332,11 +331,10 @@ export const oneOnOneData = {
       "7-day WhatsApp follow-up support",
       "Full session recording delivered to you",
       "Actionable entry and exit levels",
-      "7-day money-back guarantee",
     ],
     cta: "Book Your Session",
     note: "One-time payment. Session scheduled within 48 hours.",
-    guarantee: "7-day money-back guarantee — no questions asked.",
+    guarantee: "",
     paymentMethods: ["UPI", "Visa", "Mastercard", "Razorpay"],
   },
 

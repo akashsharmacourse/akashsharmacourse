@@ -55,7 +55,7 @@ export function Hero() {
         </p>
 
         <div className={styles.buttons}>
-          <a href="#pricing" className={styles.btnPrimary}>{heroData.ctaPrimary}</a>
+          <a href="/enroll" className={styles.btnPrimary}>{heroData.ctaPrimary}</a>
           <a href="#results" className={styles.btnSecondary}>{heroData.ctaSecondary}</a>
         </div>
 

@@ -83,7 +83,7 @@ export function Courses() {
 
               {/* Action Button */}
               <a 
-                href="#pricing" 
+                href="/enroll" 
                 className={styles.ctaButton}
                 aria-label="Enroll in Stock Market mastery programme now"
               >

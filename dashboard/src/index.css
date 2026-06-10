@@ -10,9 +10,12 @@
   --text-primary: #0A0A0A;
   --text-secondary: #555555;
   --text-muted: #999999;
-  --accent: #C9A84C;
-  --accent-dim: rgba(201,168,76,0.12);
-  --accent-light: #E8C97A;
+  --accent: #00C853;
+  --accent-light: #69F0AE;
+  --accent-dim: rgba(0,200,83,0.12);
+  --accent-glow: rgba(0,200,83,0.2);
+  --accent-red: #FF1744;
+  --accent-red-dim: rgba(255,23,68,0.12);
   --border: #EBEBEB;
   --border-hover: #D0D0D0;
   --shadow: 0 2px 16px rgba(0,0,0,0.06);

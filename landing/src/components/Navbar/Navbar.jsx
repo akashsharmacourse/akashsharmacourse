@@ -51,7 +51,7 @@ export function Navbar() {
           onClick={(e) => handleNav(e, '/')}
         >
           <img
-            src="/src/assets/logo.png"
+            src="https://res.cloudinary.com/df0gvretu/image/upload/v1781079526/logo_c0qnsv.png"
             alt="AskAkashSharma"
             className={styles.logo}
           />

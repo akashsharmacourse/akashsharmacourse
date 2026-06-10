@@ -35,7 +35,7 @@ export function CTA() {
           {/* Actions button */}
           <div className={styles.actions} style={{ '--i': 4 }}>
             <a 
-              href="#pricing" 
+              href="/enroll" 
               className={styles.ctaBtn}
               aria-label="Enroll in stock market mastery programme now"
             >
