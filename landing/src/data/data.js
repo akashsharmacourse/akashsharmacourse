@@ -238,10 +238,6 @@ export const faqData = {
       a: "Most students complete the core content within 2 to 4 weeks. Lifetime access means you revisit any lesson anytime.",
     },
     {
-      q: "Is there a refund policy?",
-      a: "Yes. Full 100% refund within 7 days of enrollment — no questions asked.",
-    },
-    {
       q: "Will I get support after completing the course?",
       a: "Absolutely. Lifetime support. Reach out with any question — even years later — and Akash Sir will personally respond.",
     },
@@ -408,10 +404,6 @@ export const oneOnOneData = {
       {
         q: "Will I get the session recording?",
         a: "Yes. The full recording is sent to you via WhatsApp within 24 hours of the session.",
-      },
-      {
-        q: "Is there a refund policy?",
-        a: "Yes. Full 100% refund within 7 days if you are not satisfied — no questions asked.",
       },
     ],
   },
