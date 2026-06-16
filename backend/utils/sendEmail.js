@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function sendWelcomeEmail({ to, name, email, password, loginUrl }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'AskAkashSharma <onboarding@resend.dev>',
+      from: 'AskAkashSharma <noreply@askakashsharma.in>',
       to,
       subject: 'Your Course Access is Ready — AskAkashSharma',
       html: `
@@ -53,7 +53,7 @@ export async function sendWelcomeEmail({ to, name, email, password, loginUrl }) 
 export async function sendOneOnOneConfirmationEmail({ to, name, calendlyLink }) {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'AskAkashSharma <onboarding@resend.dev>',
+      from: 'AskAkashSharma <noreply@askakashsharma.in>',
       to,
       subject: 'Payment Confirmed — Book Your 1-on-1 Session with Akash Sir',
       html: `
