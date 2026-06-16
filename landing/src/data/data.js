@@ -463,7 +463,7 @@ export const courseSuccessData = {
   whatsappLink: "https://wa.me/919650213917",
   whatsappCta: "Join WhatsApp Group",
   loginCta: "Login to Dashboard",
-  loginLink: "https://your-dashboard.vercel.app/login",
+  loginLink: "https://app.askakashsharma.in/login",
   note: "Did not receive email? Check spam folder or contact us.",
 };
 
