@@ -4,7 +4,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase.js'
 import {
   ChevronLeft, Plus, Trash2, Video, FileText,
-  ChevronDown, ChevronUp, AlertCircle, Edit, Play
+  ChevronDown, ChevronUp, AlertCircle, Edit, Play, Pencil
 } from 'lucide-react'
 import Modal from '../../components/Modal/Modal.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
@@ -85,6 +85,14 @@ export default function CourseDetail() {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
 
+  // Edit states
+  const [editChapterModal, setEditChapterModal] = useState(false)
+  const [editVideoModal, setEditVideoModal] = useState(false)
+  const [editChapterIdx, setEditChapterIdx] = useState(null)
+  const [editVideoIdx, setEditVideoIdx] = useState(null)
+  const [editChapterForm, setEditChapterForm] = useState({ title: '' })
+  const [editVideoForm, setEditVideoForm] = useState({ title: '', duration: '' })
+
   // Deletion States
   const [deleteChapterId, setDeleteChapterId] = useState(null)
   const [deleteLessonInfo, setDeleteLessonInfo] = useState(null) // { chapterId, lessonId }
@@ -157,6 +165,38 @@ export default function CourseDetail() {
     } catch (err) {
       console.error('Delete chapter error:', err)
     }
+  }
+
+  // --- Edit Handlers ---
+  const handleEditChapter = async () => {
+    if (!editChapterForm.title.trim()) return
+    setSaving(true)
+    try {
+      const chapters = [...(course.chapters || [])]
+      chapters[editChapterIdx].title = editChapterForm.title
+      await updateDoc(doc(db, 'courses', courseId), { chapters })
+      setEditChapterModal(false)
+      fetchCourseDetail()
+    } catch (err) {
+      console.error('Edit chapter error:', err)
+    }
+    setSaving(false)
+  }
+
+  const handleEditVideo = async () => {
+    if (!editVideoForm.title.trim()) return
+    setSaving(true)
+    try {
+      const chapters = [...(course.chapters || [])]
+      chapters[editChapterIdx].videos[editVideoIdx].title = editVideoForm.title
+      chapters[editChapterIdx].videos[editVideoIdx].duration = editVideoForm.duration
+      await updateDoc(doc(db, 'courses', courseId), { chapters })
+      setEditVideoModal(false)
+      fetchCourseDetail()
+    } catch (err) {
+      console.error('Edit video error:', err)
+    }
+    setSaving(false)
   }
 
   // --- Lesson/Video Actions ---
@@ -302,7 +342,7 @@ export default function CourseDetail() {
 
         {course.chapters?.length > 0 ? (
           <div className={styles.chaptersList}>
-            {course.chapters.map((chapter) => {
+            {course.chapters.map((chapter, ci) => {
               const isOpen = !!openChapters[chapter.id]
               return (
                 <div key={chapter.id} className={styles.chapterGroup}>
@@ -327,6 +367,17 @@ export default function CourseDetail() {
                         <Plus size={14} /> Lesson
                       </button>
                       <button
+                        className={styles.editChapterBtn}
+                        onClick={() => {
+                          setEditChapterIdx(ci)
+                          setEditChapterForm({ title: chapter.title })
+                          setEditChapterModal(true)
+                        }}
+                        title="Edit Chapter"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
                         className={styles.trashBtn}
                         onClick={() => setDeleteChapterId(chapter.id)}
                         title="Delete Chapter"
@@ -340,7 +391,7 @@ export default function CourseDetail() {
                   {isOpen && (
                     <div className={styles.lessonsContainer}>
                       {chapter.videos?.length > 0 ? (
-                        chapter.videos.map((video) => {
+                        chapter.videos.map((video, vi) => {
                           return (
                             <div key={video.id} className={styles.lessonItem}>
                               <div className={styles.lessonLeft}>
@@ -358,8 +409,24 @@ export default function CourseDetail() {
                                 )}
                                 <span className={styles.typeBadge}>Video</span>
                                 <button
+                                  className={styles.editVideoBtn}
+                                  onClick={() => {
+                                    setEditChapterIdx(ci)
+                                    setEditVideoIdx(vi)
+                                    setEditVideoForm({
+                                      title: video.title,
+                                      duration: video.duration || ''
+                                    })
+                                    setEditVideoModal(true)
+                                  }}
+                                  title="Edit Video"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                <button
                                   className={styles.lessonTrashBtn}
                                   onClick={() => setDeleteLessonInfo({ chapterId: chapter.id, lessonId: video.id })}
+                                  title="Delete Video"
                                 >
                                   <Trash2 size={14} />
                                 </button>
@@ -496,6 +563,71 @@ export default function CourseDetail() {
             </button>
             <button className={styles.saveBtn} onClick={handleAddVideo} disabled={saving || uploading}>
               {uploading ? 'Uploading...' : 'Add Lesson'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Chapter Modal */}
+      <Modal
+        isOpen={editChapterModal}
+        onClose={() => setEditChapterModal(false)}
+        title="Edit Chapter"
+        size="sm"
+      >
+        <div className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label}>Chapter Title *</label>
+            <input
+              className={styles.input}
+              value={editChapterForm.title}
+              onChange={e => setEditChapterForm({ title: e.target.value })}
+              autoFocus
+            />
+          </div>
+          <div className={styles.modalActions}>
+            <button className={styles.cancelBtn} onClick={() => setEditChapterModal(false)}>
+              Cancel
+            </button>
+            <button className={styles.saveBtn} onClick={handleEditChapter} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Video Modal */}
+      <Modal
+        isOpen={editVideoModal}
+        onClose={() => setEditVideoModal(false)}
+        title="Edit Video"
+        size="md"
+      >
+        <div className={styles.form}>
+          <div className={styles.field}>
+            <label className={styles.label}>Video Title *</label>
+            <input
+              className={styles.input}
+              value={editVideoForm.title}
+              onChange={e => setEditVideoForm(p => ({ ...p, title: e.target.value }))}
+              autoFocus
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Duration (MM:SS)</label>
+            <input
+              className={styles.input}
+              value={editVideoForm.duration}
+              onChange={e => setEditVideoForm(p => ({ ...p, duration: e.target.value }))}
+              placeholder="e.g. 12:30"
+            />
+          </div>
+          <div className={styles.modalActions}>
+            <button className={styles.cancelBtn} onClick={() => setEditVideoModal(false)}>
+              Cancel
+            </button>
+            <button className={styles.saveBtn} onClick={handleEditVideo} disabled={saving}>
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>
