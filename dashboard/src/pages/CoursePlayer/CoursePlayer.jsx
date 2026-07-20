@@ -5,9 +5,10 @@ import { getAuth } from 'firebase/auth'
 import { db } from '../../config/firebase.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import {
+  Play, Pause, Volume2, VolumeX,
+  Maximize, Minimize,
   ChevronDown, ChevronRight, FileText,
-  Lock, CheckCircle, ArrowLeft, Play,
-  AlertCircle
+  CheckCircle, ArrowLeft
 } from 'lucide-react'
 import styles from './CoursePlayer.module.css'
 
@@ -15,13 +16,26 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
 // ── Secure Video Player ───────────────────────────────
 function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
-  console.log('BACKEND_URL:', BACKEND_URL)
-  console.log('PublicId:', publicId)
-
   const [videoUrl, setVideoUrl] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const videoRef = useRef(null)
+  const containerRef = useRef(null)
+  const controlsTimerRef = useRef(null)
+
+  // Player state
+  const [playing, setPlaying] = useState(false)
+  const [muted, setMuted] = useState(false)
+  const [volume, setVolume] = useState(1)
+  const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showControls, setShowControls] = useState(true)
+  const [playbackRate, setPlaybackRate] = useState(1)
+  const [showRateMenu, setShowRateMenu] = useState(false)
+
+  const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
   useEffect(() => {
     if (!publicId) return
@@ -35,73 +49,137 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
       const auth = getAuth()
       const token = await auth.currentUser.getIdToken()
       const encodedId = encodeURIComponent(publicId)
-
       const res = await fetch(`${BACKEND_URL}/api/video/signed-url/${encodedId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-
       const data = await res.json()
-      if (data.success) {
-        setVideoUrl(data.url)
-      } else {
-        setError('Failed to load video. Please try again.')
-      }
-    } catch (err) {
-      console.error('Video URL fetch error:', err)
-      setError('Failed to load video. Please try again.')
+      if (data.success) setVideoUrl(data.url)
+      else setError('Failed to load video.')
+    } catch {
+      setError('Failed to load video.')
     }
     setLoading(false)
   }
 
-  // ── DRM Protection ────────────────────────────────
+  // Format time MM:SS
+  const formatTime = (sec) => {
+    if (!sec || isNaN(sec)) return '0:00'
+    const m = Math.floor(sec / 60)
+    const s = Math.floor(sec % 60)
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
+
+  // Controls visibility
+  const showControlsTemporarily = () => {
+    setShowControls(true)
+    clearTimeout(controlsTimerRef.current)
+    controlsTimerRef.current = setTimeout(() => {
+      if (playing) setShowControls(false)
+    }, 3000)
+  }
+
+  // Play/Pause
+  const togglePlay = () => {
+    if (!videoRef.current) return
+    if (videoRef.current.paused) {
+      videoRef.current.play()
+      setPlaying(true)
+    } else {
+      videoRef.current.pause()
+      setPlaying(false)
+    }
+    showControlsTemporarily()
+  }
+
+  // Mute
+  const toggleMute = () => {
+    if (!videoRef.current) return
+    videoRef.current.muted = !muted
+    setMuted(!muted)
+  }
+
+  // Volume
+  const handleVolume = (e) => {
+    const val = parseFloat(e.target.value)
+    videoRef.current.volume = val
+    setVolume(val)
+    setMuted(val === 0)
+  }
+
+  // Progress
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return
+    const curr = videoRef.current.currentTime
+    const dur = videoRef.current.duration
+    setCurrentTime(curr)
+    setProgress((curr / dur) * 100)
+  }
+
+  // Duration
+  const handleLoadedMetadata = () => {
+    if (!videoRef.current) return
+    setDuration(videoRef.current.duration)
+  }
+
+  // Seek
+  const handleSeek = (e) => {
+    const bar = e.currentTarget
+    const rect = bar.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const percent = Math.max(0, Math.min(1, x / rect.width))
+    videoRef.current.currentTime = percent * videoRef.current.duration
+    setProgress(percent * 100)
+    showControlsTemporarily()
+  }
+
+  // Fullscreen
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen()
+      setIsFullscreen(true)
+    } else {
+      document.exitFullscreen()
+      setIsFullscreen(false)
+    }
+  }
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', handleFsChange)
+    return () => document.removeEventListener('fullscreenchange', handleFsChange)
+  }, [])
+
+  // Playback rate
+  const changeRate = (rate) => {
+    videoRef.current.playbackRate = rate
+    setPlaybackRate(rate)
+    setShowRateMenu(false)
+  }
+
+  // DRM Protection
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    // Disable right click on video
     const preventRightClick = (e) => e.preventDefault()
     video.addEventListener('contextmenu', preventRightClick)
-
-    // Pause on devtools open
-    const handleVisibilityChange = () => {
-      if (document.hidden) video.pause()
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-
-    // Detect devtools
-    let devtoolsOpen = false
-    const threshold = 160
-    const checkDevTools = () => {
-      if (
-        window.outerWidth - window.innerWidth > threshold ||
-        window.outerHeight - window.innerHeight > threshold
-      ) {
-        if (!devtoolsOpen) {
-          devtoolsOpen = true
-          video.pause()
-        }
-      } else {
-        devtoolsOpen = false
-      }
-    }
-    const devToolsInterval = setInterval(checkDevTools, 1000)
-
-    // Disable keyboard shortcuts
     const preventShortcuts = (e) => {
-      if (
-        (e.ctrlKey && ['s', 'u', 'i', 'j', 'c'].includes(e.key.toLowerCase())) ||
-        e.key === 'F12'
-      ) {
+      if ((e.ctrlKey && ['s','u','i','j'].includes(e.key.toLowerCase())) || e.key === 'F12') {
         e.preventDefault()
       }
     }
     document.addEventListener('keydown', preventShortcuts)
-
+    const checkDevTools = setInterval(() => {
+      if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+        video.pause()
+        setPlaying(false)
+      }
+    }, 1000)
     return () => {
       video.removeEventListener('contextmenu', preventRightClick)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
       document.removeEventListener('keydown', preventShortcuts)
-      clearInterval(devToolsInterval)
+      clearInterval(checkDevTools)
     }
   }, [videoUrl])
 
@@ -114,28 +192,123 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
 
   if (error) return (
     <div className={styles.videoError}>
-      <AlertCircle size={32} />
       <p>{error}</p>
-      <button onClick={fetchSignedUrl} className={styles.retryBtn}>
-        Retry
-      </button>
+      <button onClick={fetchSignedUrl} className={styles.retryBtn}>Retry</button>
     </div>
   )
 
   return (
-    <div className={styles.videoWrapper} onContextMenu={e => e.preventDefault()}>
+    <div
+      ref={containerRef}
+      className={styles.videoWrapper}
+      onMouseMove={showControlsTemporarily}
+      onMouseLeave={() => playing && setShowControls(false)}
+      onClick={togglePlay}
+      onContextMenu={e => e.preventDefault()}
+    >
       <video
         ref={videoRef}
         src={videoUrl}
         className={styles.video}
-        controls
-        controlsList="nodownload noremoteplayback"
-        disablePictureInPicture
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
         playsInline
       />
-      {/* Watermark overlay */}
-      <div className={styles.watermark}>
+
+      {/* Watermark */}
+      <div className={styles.watermarkTopLeft}>
         {studentName} | {studentEmail}
+      </div>
+      <div className={styles.watermarkBottomRight}>
+        {studentName} | {studentEmail}
+      </div>
+
+      {/* Controls overlay */}
+      <div
+        className={`${styles.controls} ${showControls ? styles.controlsVisible : ''}`}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Progress bar */}
+        <div className={styles.progressBar} onClick={handleSeek}>
+          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          <div className={styles.progressThumb} style={{ left: `${progress}%` }} />
+        </div>
+
+        {/* Bottom controls */}
+        <div className={styles.controlsBottom}>
+          {/* Left */}
+          <div className={styles.controlsLeft}>
+            {/* Play/Pause */}
+            <button className={styles.controlBtn} onClick={togglePlay}>
+              {playing
+                ? <Pause size={18} fill="white" color="white" />
+                : <Play size={18} fill="white" color="white" />
+              }
+            </button>
+
+            {/* Volume */}
+            <div className={styles.volumeWrap}>
+              <button className={styles.controlBtn} onClick={toggleMute}>
+                {muted || volume === 0
+                  ? <VolumeX size={18} color="white" />
+                  : <Volume2 size={18} color="white" />
+                }
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={muted ? 0 : volume}
+                onChange={handleVolume}
+                className={styles.volumeSlider}
+                onClick={e => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Time */}
+            <span className={styles.timeDisplay}>
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+          </div>
+
+          {/* Right */}
+          <div className={styles.controlsRight}>
+            {/* Playback rate */}
+            <div className={styles.rateWrap}>
+              <button
+                className={styles.controlBtn}
+                onClick={e => { e.stopPropagation(); setShowRateMenu(!showRateMenu) }}
+              >
+                <span className={styles.rateText}>{playbackRate}x</span>
+              </button>
+              {showRateMenu && (
+                <div className={styles.rateMenu}>
+                  {rates.map(r => (
+                    <button
+                      key={r}
+                      className={`${styles.rateOption} ${playbackRate === r ? styles.rateActive : ''}`}
+                      onClick={e => { e.stopPropagation(); changeRate(r) }}
+                    >
+                      {r}x
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Fullscreen */}
+            <button className={styles.controlBtn} onClick={toggleFullscreen}>
+              {isFullscreen
+                ? <Minimize size={18} color="white" />
+                : <Maximize size={18} color="white" />
+              }
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )
