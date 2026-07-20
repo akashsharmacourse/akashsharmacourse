@@ -44,10 +44,16 @@ export function Hero() {
         </h1>
 
         <div className={styles.videoCard}>
-          <div className={styles.playButton}>
-            <PlayIcon size={32} />
-          </div>
-          <span className={styles.videoLabel}>Introduction by Akash Sir</span>
+          <video
+            className={styles.heroVideo}
+            src={heroData.videoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            controlsList="nodownload"
+            onContextMenu={e => e.preventDefault()}
+          />
         </div>
 
         <p className={styles.subheadline}>

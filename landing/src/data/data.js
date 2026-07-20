@@ -24,7 +24,8 @@ export const heroData = {
     { value: 600, suffix: "+", label: "Five-Star Reviews" },
     { value: 10, suffix: "+", label: "Years Experience" },
   ],
-  videoPlaceholder: true,
+  videoUrl: "https://res.cloudinary.com/df0gvretu/video/upload/v1784528141/Ytt_ad_video_v1_fdsnzb.mp4",
+  videoPlaceholder: false,
 };
 
 // ─── TRUST STRIP ──────────────────────────────────────
