@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, query, where, limit, getDocs } from 'firebase/firestore'
 import { db } from '../../config/firebase.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { BookOpen, ChevronRight } from 'lucide-react'
@@ -14,12 +14,16 @@ export default function MyCourses() {
 
   useEffect(() => {
     const fetchCourse = async () => {
-      if (!userData?.hasAccess || !userData?.enrolledCourseId) {
-        setLoading(false)
-        return
-      }
       try {
-        const snap = await getDoc(doc(db, 'courses', userData.enrolledCourseId))
+        const coursesSnap = await getDocs(
+          query(
+            collection(db, 'courses'),
+            where('published', '==', true),
+            limit(1)
+          )
+        )
+        if (coursesSnap.empty) { setLoading(false); return }
+        const snap = coursesSnap.docs[0]
         if (snap.exists()) setCourse({ id: snap.id, ...snap.data() })
       } catch (err) {
         console.error('Fetch course error:', err)

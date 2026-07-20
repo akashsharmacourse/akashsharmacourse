@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, collection, query, where, limit, getDocs } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { db } from '../../config/firebase.js'
 import { useAuth } from '../../context/AuthContext.jsx'
@@ -154,12 +154,16 @@ export default function CoursePlayer() {
 
   useEffect(() => {
     const fetchCourse = async () => {
-      if (!userData?.hasAccess || !userData?.enrolledCourseId) {
-        navigate('/courses')
-        return
-      }
       try {
-        const snap = await getDoc(doc(db, 'courses', userData.enrolledCourseId))
+        const coursesSnap = await getDocs(
+          query(
+            collection(db, 'courses'),
+            where('published', '==', true),
+            limit(1)
+          )
+        )
+        if (coursesSnap.empty) { setLoading(false); return }
+        const snap = coursesSnap.docs[0]
         if (snap.exists()) {
           const data = { id: snap.id, ...snap.data() }
           setCourse(data)

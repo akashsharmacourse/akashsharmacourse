@@ -16,7 +16,7 @@ export default function Home() {
   const progress = Math.min(userData?.progress || 0, 100)
 
   const stats = [
-    { icon: 'BookOpen', label: 'Enrolled Courses', value: userData?.hasAccess ? 1 : 0 },
+    { icon: 'BookOpen', label: 'Enrolled Courses', value: 1 },
     { icon: 'CheckCircle', label: 'Completed Chapters', value: Math.min(completedCount, totalVideos) },
     { icon: 'Clock', label: 'Watch Time', value: `${userData?.watchTimeMinutes || 0} mins` },
     { icon: 'TrendingUp', label: 'Overall Progress', value: `${progress}%` },
@@ -56,7 +56,7 @@ export default function Home() {
       {/* Continue learning */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>Continue Learning</h3>
-        {userData?.hasAccess && userData?.enrolledCourseId ? (
+        {true ? (
           <div className={styles.courseGrid}>
             <div className={styles.courseCard}>
               <div className={styles.courseInfo}>
@@ -71,7 +71,7 @@ export default function Home() {
                   style={{ width: `${Math.min(userData?.progress || 0, 100)}%` }}
                 />
               </div>
-              <Link to={`/courses/${userData.enrolledCourseId}`} className={styles.continueBtn}>
+              <Link to={userData?.enrolledCourseId ? `/courses/${userData.enrolledCourseId}` : '/courses'} className={styles.continueBtn}>
                 Continue
               </Link>
             </div>
