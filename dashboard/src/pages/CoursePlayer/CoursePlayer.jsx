@@ -11,14 +11,12 @@ import {
   CheckCircle, ArrowLeft
 } from 'lucide-react'
 import styles from './CoursePlayer.module.css'
-import Hls from 'hls.js'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
 function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   const videoRef = useRef(null)
   const containerRef = useRef(null)
-  const hlsRef = useRef(null)
   const controlsTimerRef = useRef(null)
 
   const [loading, setLoading] = useState(true)
@@ -33,89 +31,39 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   const [showControls, setShowControls] = useState(true)
   const [playbackRate, setPlaybackRate] = useState(1)
   const [showRateMenu, setShowRateMenu] = useState(false)
-  const [qualityLevels, setQualityLevels] = useState([])
-  const [currentLevel, setCurrentLevel] = useState(-1)
-  const [showQualityMenu, setShowQualityMenu] = useState(false)
 
   const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
   useEffect(() => {
     if (!publicId) return
-    fetchHLSUrl()
-    return () => {
-      if (hlsRef.current) hlsRef.current.destroy()
-    }
+    fetchSignedUrl()
   }, [publicId])
 
-  const fetchHLSUrl = async () => {
+  const fetchSignedUrl = async () => {
     setLoading(true)
     setError(null)
-    if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null }
-
     try {
       const auth = getAuth()
       const token = await auth.currentUser.getIdToken()
       const encodedId = encodeURIComponent(publicId)
 
-      const res = await fetch(`${BACKEND_URL}/api/video/hls-url/${encodedId}`, {
+      const res = await fetch(`${BACKEND_URL}/api/video/signed-url/${encodedId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
-
-      if (!data.success) { setError('Failed to load video.'); setLoading(false); return }
-
-      const video = videoRef.current
-
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          startLevel: -1,
-          capLevelToPlayerSize: true,
-          maxBufferLength: 30,
-        })
-
-        hls.loadSource(data.hlsUrl)
-        hls.attachMedia(video)
-
-        hls.on(Hls.Events.MANIFEST_PARSED, (event, hlsData) => {
-          const levels = hlsData.levels.map((l, i) => ({
-            index: i,
-            height: l.height || `Quality ${i + 1}`,
-            label: l.height ? `${l.height}p` : `Quality ${i + 1}`
-          }))
-          setQualityLevels(levels)
-          setCurrentLevel(-1)
-          setLoading(false)
-          video.play().then(() => setPlaying(true)).catch(() => {})
-        })
-
-        hls.on(Hls.Events.LEVEL_SWITCHED, (event, d) => {
-          setCurrentLevel(d.level)
-        })
-
-        hls.on(Hls.Events.ERROR, (event, d) => {
-          if (d.fatal) {
-            console.error('HLS error:', d)
-            setError('Video load failed. Please retry.')
-            setLoading(false)
-          }
-        })
-
-        hlsRef.current = hls
-
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Safari
-        video.src = data.hlsUrl
-        video.addEventListener('loadedmetadata', () => {
-          setLoading(false)
-          video.play().then(() => setPlaying(true)).catch(() => {})
-        })
+      if (data.success) {
+        if (videoRef.current) {
+          videoRef.current.src = data.url
+          videoRef.current.load()
+        }
+        setLoading(false)
       } else {
-        setError('Your browser does not support video streaming.')
+        setError('Failed to load video.')
         setLoading(false)
       }
     } catch (err) {
-      console.error('HLS fetch error:', err)
-      setError('Failed to load video. Please retry.')
+      console.error('Fetch signed URL error:', err)
+      setError('Failed to load video.')
       setLoading(false)
     }
   }
@@ -197,12 +145,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     setShowRateMenu(false)
   }
 
-  const changeQuality = (levelIndex) => {
-    if (hlsRef.current) hlsRef.current.currentLevel = levelIndex
-    setCurrentLevel(levelIndex)
-    setShowQualityMenu(false)
-  }
-
   // DRM Protection
   useEffect(() => {
     const video = videoRef.current
@@ -228,10 +170,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     }
   }, [])
 
-  const qualityLabel = currentLevel === -1
-    ? 'Auto'
-    : qualityLevels[currentLevel]?.label || 'Auto'
-
   if (loading) return (
     <div className={styles.videoLoading}>
       <div className={styles.spinner} />
@@ -242,7 +180,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   if (error) return (
     <div className={styles.videoError}>
       <p>{error}</p>
-      <button onClick={fetchHLSUrl} className={styles.retryBtn}>Retry</button>
+      <button onClick={fetchSignedUrl} className={styles.retryBtn}>Retry</button>
     </div>
   )
 
@@ -322,42 +260,11 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
 
           {/* Right */}
           <div className={styles.controlsRight}>
-            {/* Quality selector */}
-            {qualityLevels.length > 0 && (
-              <div className={styles.rateWrap}>
-                <button
-                  className={styles.controlBtn}
-                  onClick={e => { e.stopPropagation(); setShowQualityMenu(!showQualityMenu); setShowRateMenu(false) }}
-                >
-                  <span className={styles.rateText}>{qualityLabel}</span>
-                </button>
-                {showQualityMenu && (
-                  <div className={styles.rateMenu}>
-                    <button
-                      className={`${styles.rateOption} ${currentLevel === -1 ? styles.rateActive : ''}`}
-                      onClick={e => { e.stopPropagation(); changeQuality(-1) }}
-                    >
-                      Auto
-                    </button>
-                    {qualityLevels.map((level, i) => (
-                      <button
-                        key={i}
-                        className={`${styles.rateOption} ${currentLevel === i ? styles.rateActive : ''}`}
-                        onClick={e => { e.stopPropagation(); changeQuality(i) }}
-                      >
-                        {level.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Playback rate */}
             <div className={styles.rateWrap}>
               <button
                 className={styles.controlBtn}
-                onClick={e => { e.stopPropagation(); setShowRateMenu(!showRateMenu); setShowQualityMenu(false) }}
+                onClick={e => { e.stopPropagation(); setShowRateMenu(!showRateMenu) }}
               >
                 <span className={styles.rateText}>{playbackRate}x</span>
               </button>
