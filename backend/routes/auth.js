@@ -1,5 +1,6 @@
 import express from 'express'
 import { auth, db } from '../config/firebase.js'
+import { adminMiddleware } from '../middleware/adminMiddleware.js'
 
 const router = express.Router()
 
@@ -17,6 +18,19 @@ router.post('/verify', async (req, res) => {
     res.json({ success: true, user: { uid: decoded.uid, ...user.data() } })
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' })
+  }
+})
+
+// Delete user from Firebase Auth
+router.delete('/user/:uid', adminMiddleware, async (req, res) => {
+  try {
+    const { uid } = req.params
+    await auth.deleteUser(uid)
+    console.log('Firebase Auth user deleted:', uid)
+    res.json({ success: true })
+  } catch (err) {
+    console.error('Delete user error:', err)
+    res.status(500).json({ error: 'Failed to delete user' })
   }
 })
 

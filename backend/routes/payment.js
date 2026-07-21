@@ -127,6 +127,9 @@ router.post('/verify', async (req, res) => {
           .get()
         const courseId = courseSnap.empty ? '' : courseSnap.docs[0].id
 
+        const accessExpiresAt = new Date()
+        accessExpiresAt.setDate(accessExpiresAt.getDate() + 30)
+
         await db.collection('users').doc(userRecord.uid).set({
           name,
           email,
@@ -137,6 +140,7 @@ router.post('/verify', async (req, res) => {
           progress: 0,
           watchTimeMinutes: 0,
           createdAt: new Date().toISOString(),
+          accessExpiresAt: accessExpiresAt.toISOString(),
           paymentAmount: 9999,
           paymentId: razorpay_payment_id,
         }, { merge: true })

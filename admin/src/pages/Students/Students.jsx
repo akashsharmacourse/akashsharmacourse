@@ -3,10 +3,12 @@ import {
   collection, getDocs, doc, updateDoc, deleteDoc
 } from 'firebase/firestore'
 import { db } from '../../config/firebase.js'
-import { Users, Mail, Phone, BookOpen, Trash2, Award, Calendar, AlertCircle } from 'lucide-react'
+import { Users, Mail, Phone, BookOpen, Trash2, Award, Calendar, AlertCircle, Clock } from 'lucide-react'
 import Modal from '../../components/Modal/Modal.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
 import styles from './Students.module.css'
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
 export default function Students() {
   const [students, setStudents] = useState([])
@@ -96,6 +98,19 @@ export default function Students() {
   const handleDeleteStudent = async () => {
     if (!deleteStudentId) return
     try {
+      // Delete from Firebase Auth via backend
+      await fetch(`${BACKEND_URL}/api/auth/user/${deleteStudentId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
+        },
+      })
+      console.log('Auth user deleted')
+    } catch (err) {
+      console.error('Auth delete error:', err)
+    }
+
+    try {
       await deleteDoc(doc(db, 'users', deleteStudentId))
       setDeleteStudentId(null)
       fetchData()
@@ -172,6 +187,14 @@ export default function Students() {
                     <Calendar size={13} className={styles.detailIcon} />
                     <span className={styles.dateText}>
                       Joined: {student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-IN') : '—'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <Clock size={13} className={styles.detailIcon} />
+                    <span className={styles.dateText}>
+                      Expires: {student.accessExpiresAt
+                        ? new Date(student.accessExpiresAt).toLocaleDateString('en-IN')
+                        : 'Never'}
                     </span>
                   </div>
                 </div>

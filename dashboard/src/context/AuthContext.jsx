@@ -4,7 +4,7 @@ import {
   signOut,
   onAuthStateChanged
 } from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { auth, db } from '../config/firebase.js'
 
 const AuthContext = createContext()
@@ -42,6 +42,21 @@ export function AuthProvider({ children }) {
               return
             }
           }
+
+          // 30 days expiry check
+          if (data.accessExpiresAt) {
+            const expiry = new Date(data.accessExpiresAt)
+            const now = new Date()
+            if (now > expiry && data.hasAccess !== false) {
+              // Access expired — revoke
+              await updateDoc(doc(db, 'users', firebaseUser.uid), {
+                hasAccess: false
+              })
+              data.hasAccess = false
+              console.log('Access expired for:', firebaseUser.email)
+            }
+          }
+
           setUserData(data)
         }
         setUser(firebaseUser)

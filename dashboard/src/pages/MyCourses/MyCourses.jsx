@@ -64,6 +64,28 @@ export default function MyCourses() {
             </div>
             <div className={styles.cardContent}>
               <h3 className={styles.courseTitle}>{course.title}</h3>
+              {(() => {
+                if (!userData?.accessExpiresAt) return null
+                const expiry = new Date(userData.accessExpiresAt)
+                const now = new Date()
+                const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
+                
+                if (daysLeft <= 0) return (
+                  <span className={styles.expired}>Access Expired</span>
+                )
+                
+                if (daysLeft <= 7) return (
+                  <span className={styles.expiryWarning}>
+                    ⚠️ {daysLeft} days left
+                  </span>
+                )
+                
+                return (
+                  <span className={styles.expiryInfo}>
+                    Valid till {expiry.toLocaleDateString('en-IN')}
+                  </span>
+                )
+              })()}
               <p className={styles.courseDesc}>{course.description}</p>
               <div className={styles.cardFooter}>
                 <div className={styles.progressWrap}>

@@ -122,3 +122,21 @@
   object-fit: cover;
   display: block;
 }
+
+.expiryInfo {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.expiryWarning {
+  font-size: 11px;
+  color: #E24B4A;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+.expired {
+  font-size: 11px;
+  color: #E24B4A;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
