@@ -9,7 +9,6 @@ import Login from './pages/Login/Login.jsx'
 import Home from './pages/Home/Home.jsx'
 import MyCourses from './pages/MyCourses/MyCourses.jsx'
 import CoursePlayer from './pages/CoursePlayer/CoursePlayer.jsx'
-import LiveSessions from './pages/LiveSessions/LiveSessions.jsx'
 import Support from './pages/Support/Support.jsx'
 import Profile from './pages/Profile/Profile.jsx'
 import styles from './App.module.css'
@@ -17,7 +16,6 @@ import styles from './App.module.css'
 const pageTitles = {
   '/': 'Home',
   '/courses': 'My Courses',
-  '/live': 'Live Sessions',
   '/support': 'Support',
   '/profile': 'Profile',
 }
@@ -73,13 +71,7 @@ export default function App() {
                 </DashboardLayout>
               </ProtectedRoute>
             } />
-            <Route path="/live" element={
-              <ProtectedRoute>
-                <DashboardLayout>
-                  <LiveSessions />
-                </DashboardLayout>
-              </ProtectedRoute>
-            } />
+
             <Route path="/support" element={
               <ProtectedRoute>
                 <DashboardLayout>

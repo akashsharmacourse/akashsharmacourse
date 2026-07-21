@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LayoutDashboard, BookOpen, Video,
+  LayoutDashboard, BookOpen,
   MessageCircle, User, LogOut, Sun, Moon
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext.jsx'
@@ -9,7 +9,7 @@ import { sidebarData } from '../../data/data.js'
 import styles from './Sidebar.module.css'
 
 const iconMap = {
-  LayoutDashboard, BookOpen, Video,
+  LayoutDashboard, BookOpen,
   MessageCircle, User,
 }
 

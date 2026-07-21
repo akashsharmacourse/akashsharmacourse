@@ -222,6 +222,9 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
       <div className={styles.watermarkTopLeft}>
         {studentName} | {studentEmail}
       </div>
+      <div className={styles.watermarkCenter}>
+        {studentName} | {studentEmail}
+      </div>
       <div className={styles.watermarkBottomRight}>
         {studentName} | {studentEmail}
       </div>

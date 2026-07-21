@@ -4,7 +4,6 @@ export const sidebarData = {
   links: [
     { label: 'Home', href: '/', icon: 'LayoutDashboard' },
     { label: 'My Courses', href: '/courses', icon: 'BookOpen' },
-    { label: 'Live Sessions', href: '/live', icon: 'Video' },
     { label: 'Support', href: '/support', icon: 'MessageCircle' },
     { label: 'Profile', href: '/profile', icon: 'User' },
   ],
