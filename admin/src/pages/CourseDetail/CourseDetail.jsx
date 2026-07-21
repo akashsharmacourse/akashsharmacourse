@@ -219,15 +219,18 @@ export default function CourseDetail() {
   }
 
   const handleAddVideo = async () => {
-    if (!videoForm.title.trim() || !videoForm.videoFile) return
+    if (!videoForm.title.trim()) return
     setSaving(true)
     setUploading(true)
 
     try {
-      // Upload video
-      setUploadProgress('Uploading video...')
-      const videoPublicId = await uploadToCloudinary(videoForm.videoFile, 'video')
-      console.log('Video uploaded:', videoPublicId)
+      // Upload video if exists
+      let videoPublicId = ''
+      if (videoForm.videoFile) {
+        setUploadProgress('Uploading video...')
+        videoPublicId = await uploadToCloudinary(videoForm.videoFile, 'video')
+        console.log('Video uploaded:', videoPublicId)
+      }
 
       // Upload PDF if exists
       let pdfPublicId = ''
@@ -514,7 +517,7 @@ export default function CourseDetail() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Video File * (MP4)</label>
+            <label className={styles.label}>Video File (MP4)</label>
             <input
               type="file"
               accept="video/mp4,video/*"
