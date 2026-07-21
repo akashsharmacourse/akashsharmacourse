@@ -448,23 +448,9 @@ export default function CoursePlayer() {
     return userData?.completedChapters?.includes(key)
   }
 
-  const openPdf = async (pdfPublicId) => {
-    try {
-      const auth = getAuth()
-      const token = await auth.currentUser.getIdToken()
-      const encodedId = encodeURIComponent(pdfPublicId)
-
-      const res = await fetch(`${BACKEND_URL}/api/video/signed-pdf/${encodedId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const data = await res.json()
-      if (data.success) {
-        setPdfUrl(data.url)
-        setShowPdf(true)
-      }
-    } catch (err) {
-      console.error('PDF open error:', err)
-    }
+  const openPdf = (pdfUrl) => {
+    setPdfUrl(pdfUrl)
+    setShowPdf(true)
   }
 
   if (loading) return (
