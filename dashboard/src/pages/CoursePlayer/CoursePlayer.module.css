@@ -85,8 +85,9 @@
   position: absolute;
   top: 12px;
   left: 12px;
-  color: rgba(255,255,255,0.35);
-  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  font-weight: 500;
   font-family: var(--font-mono);
   pointer-events: none;
   user-select: none;
@@ -98,8 +99,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(-30deg);
-  color: rgba(255,255,255,0.15);
-  font-size: 14px;
+  color: rgba(255,255,255,0.25);
+  font-size: 16px;
+  font-weight: 500;
   font-family: var(--font-mono);
   pointer-events: none;
   user-select: none;
@@ -110,8 +112,9 @@
   position: absolute;
   bottom: 56px;
   right: 12px;
-  color: rgba(255,255,255,0.35);
-  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  font-weight: 500;
   font-family: var(--font-mono);
   pointer-events: none;
   user-select: none;
