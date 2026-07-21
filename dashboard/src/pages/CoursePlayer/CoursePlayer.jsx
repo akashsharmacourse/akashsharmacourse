@@ -11,19 +11,18 @@ import {
   CheckCircle, ArrowLeft
 } from 'lucide-react'
 import styles from './CoursePlayer.module.css'
+import Hls from 'hls.js'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
-// ── Secure Video Player ───────────────────────────────
 function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
-  const [videoUrl, setVideoUrl] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const videoRef = useRef(null)
   const containerRef = useRef(null)
+  const hlsRef = useRef(null)
   const controlsTimerRef = useRef(null)
 
-  // Player state
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
   const [volume, setVolume] = useState(1)
@@ -34,34 +33,93 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   const [showControls, setShowControls] = useState(true)
   const [playbackRate, setPlaybackRate] = useState(1)
   const [showRateMenu, setShowRateMenu] = useState(false)
+  const [qualityLevels, setQualityLevels] = useState([])
+  const [currentLevel, setCurrentLevel] = useState(-1)
+  const [showQualityMenu, setShowQualityMenu] = useState(false)
 
   const rates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
   useEffect(() => {
     if (!publicId) return
-    fetchSignedUrl()
+    fetchHLSUrl()
+    return () => {
+      if (hlsRef.current) hlsRef.current.destroy()
+    }
   }, [publicId])
 
-  const fetchSignedUrl = async () => {
+  const fetchHLSUrl = async () => {
     setLoading(true)
     setError(null)
+    if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null }
+
     try {
       const auth = getAuth()
       const token = await auth.currentUser.getIdToken()
       const encodedId = encodeURIComponent(publicId)
-      const res = await fetch(`${BACKEND_URL}/api/video/signed-url/${encodedId}`, {
+
+      const res = await fetch(`${BACKEND_URL}/api/video/hls-url/${encodedId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
-      if (data.success) setVideoUrl(data.url)
-      else setError('Failed to load video.')
-    } catch {
-      setError('Failed to load video.')
+
+      if (!data.success) { setError('Failed to load video.'); setLoading(false); return }
+
+      const video = videoRef.current
+
+      if (Hls.isSupported()) {
+        const hls = new Hls({
+          startLevel: -1,
+          capLevelToPlayerSize: true,
+          maxBufferLength: 30,
+        })
+
+        hls.loadSource(data.hlsUrl)
+        hls.attachMedia(video)
+
+        hls.on(Hls.Events.MANIFEST_PARSED, (event, hlsData) => {
+          const levels = hlsData.levels.map((l, i) => ({
+            index: i,
+            height: l.height || `Quality ${i + 1}`,
+            label: l.height ? `${l.height}p` : `Quality ${i + 1}`
+          }))
+          setQualityLevels(levels)
+          setCurrentLevel(-1)
+          setLoading(false)
+          video.play().then(() => setPlaying(true)).catch(() => {})
+        })
+
+        hls.on(Hls.Events.LEVEL_SWITCHED, (event, d) => {
+          setCurrentLevel(d.level)
+        })
+
+        hls.on(Hls.Events.ERROR, (event, d) => {
+          if (d.fatal) {
+            console.error('HLS error:', d)
+            setError('Video load failed. Please retry.')
+            setLoading(false)
+          }
+        })
+
+        hlsRef.current = hls
+
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari
+        video.src = data.hlsUrl
+        video.addEventListener('loadedmetadata', () => {
+          setLoading(false)
+          video.play().then(() => setPlaying(true)).catch(() => {})
+        })
+      } else {
+        setError('Your browser does not support video streaming.')
+        setLoading(false)
+      }
+    } catch (err) {
+      console.error('HLS fetch error:', err)
+      setError('Failed to load video. Please retry.')
+      setLoading(false)
     }
-    setLoading(false)
   }
 
-  // Format time MM:SS
   const formatTime = (sec) => {
     if (!sec || isNaN(sec)) return '0:00'
     const m = Math.floor(sec / 60)
@@ -69,36 +127,27 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     return `${m}:${s.toString().padStart(2, '0')}`
   }
 
-  // Controls visibility
   const showControlsTemporarily = () => {
     setShowControls(true)
     clearTimeout(controlsTimerRef.current)
     controlsTimerRef.current = setTimeout(() => {
-      if (playing) setShowControls(false)
+      if (videoRef.current && !videoRef.current.paused) setShowControls(false)
     }, 3000)
   }
 
-  // Play/Pause
   const togglePlay = () => {
-    if (!videoRef.current) return
-    if (videoRef.current.paused) {
-      videoRef.current.play()
-      setPlaying(true)
-    } else {
-      videoRef.current.pause()
-      setPlaying(false)
-    }
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) { video.play(); setPlaying(true) }
+    else { video.pause(); setPlaying(false) }
     showControlsTemporarily()
   }
 
-  // Mute
   const toggleMute = () => {
-    if (!videoRef.current) return
     videoRef.current.muted = !muted
     setMuted(!muted)
   }
 
-  // Volume
   const handleVolume = (e) => {
     const val = parseFloat(e.target.value)
     videoRef.current.volume = val
@@ -106,33 +155,26 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     setMuted(val === 0)
   }
 
-  // Progress
   const handleTimeUpdate = () => {
     if (!videoRef.current) return
     const curr = videoRef.current.currentTime
     const dur = videoRef.current.duration
     setCurrentTime(curr)
-    setProgress((curr / dur) * 100)
+    if (dur) setProgress((curr / dur) * 100)
   }
 
-  // Duration
   const handleLoadedMetadata = () => {
-    if (!videoRef.current) return
-    setDuration(videoRef.current.duration)
+    if (videoRef.current) setDuration(videoRef.current.duration)
   }
 
-  // Seek
   const handleSeek = (e) => {
-    const bar = e.currentTarget
-    const rect = bar.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const percent = Math.max(0, Math.min(1, x / rect.width))
+    const rect = e.currentTarget.getBoundingClientRect()
+    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
     videoRef.current.currentTime = percent * videoRef.current.duration
     setProgress(percent * 100)
     showControlsTemporarily()
   }
 
-  // Fullscreen
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen()
@@ -144,18 +186,21 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   }
 
   useEffect(() => {
-    const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement)
     document.addEventListener('fullscreenchange', handleFsChange)
     return () => document.removeEventListener('fullscreenchange', handleFsChange)
   }, [])
 
-  // Playback rate
   const changeRate = (rate) => {
     videoRef.current.playbackRate = rate
     setPlaybackRate(rate)
     setShowRateMenu(false)
+  }
+
+  const changeQuality = (levelIndex) => {
+    if (hlsRef.current) hlsRef.current.currentLevel = levelIndex
+    setCurrentLevel(levelIndex)
+    setShowQualityMenu(false)
   }
 
   // DRM Protection
@@ -170,7 +215,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
       }
     }
     document.addEventListener('keydown', preventShortcuts)
-    const checkDevTools = setInterval(() => {
+    const devToolsCheck = setInterval(() => {
       if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
         video.pause()
         setPlaying(false)
@@ -179,9 +224,13 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     return () => {
       video.removeEventListener('contextmenu', preventRightClick)
       document.removeEventListener('keydown', preventShortcuts)
-      clearInterval(checkDevTools)
+      clearInterval(devToolsCheck)
     }
-  }, [videoUrl])
+  }, [])
+
+  const qualityLabel = currentLevel === -1
+    ? 'Auto'
+    : qualityLevels[currentLevel]?.label || 'Auto'
 
   if (loading) return (
     <div className={styles.videoLoading}>
@@ -193,7 +242,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   if (error) return (
     <div className={styles.videoError}>
       <p>{error}</p>
-      <button onClick={fetchSignedUrl} className={styles.retryBtn}>Retry</button>
+      <button onClick={fetchHLSUrl} className={styles.retryBtn}>Retry</button>
     </div>
   )
 
@@ -208,7 +257,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     >
       <video
         ref={videoRef}
-        src={videoUrl}
         className={styles.video}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
@@ -218,7 +266,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
         playsInline
       />
 
-      {/* Watermark */}
+      {/* Watermarks */}
       <div className={styles.watermarkTopLeft}>
         {studentName} | {studentEmail}
       </div>
@@ -229,7 +277,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
         {studentName} | {studentEmail}
       </div>
 
-      {/* Controls overlay */}
+      {/* Controls */}
       <div
         className={`${styles.controls} ${showControls ? styles.controlsVisible : ''}`}
         onClick={e => e.stopPropagation()}
@@ -240,11 +288,10 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
           <div className={styles.progressThumb} style={{ left: `${progress}%` }} />
         </div>
 
-        {/* Bottom controls */}
+        {/* Bottom row */}
         <div className={styles.controlsBottom}>
           {/* Left */}
           <div className={styles.controlsLeft}>
-            {/* Play/Pause */}
             <button className={styles.controlBtn} onClick={togglePlay}>
               {playing
                 ? <Pause size={18} fill="white" color="white" />
@@ -252,7 +299,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
               }
             </button>
 
-            {/* Volume */}
             <div className={styles.volumeWrap}>
               <button className={styles.controlBtn} onClick={toggleMute}>
                 {muted || volume === 0
@@ -261,10 +307,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
                 }
               </button>
               <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
+                type="range" min="0" max="1" step="0.1"
                 value={muted ? 0 : volume}
                 onChange={handleVolume}
                 className={styles.volumeSlider}
@@ -272,7 +315,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
               />
             </div>
 
-            {/* Time */}
             <span className={styles.timeDisplay}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
@@ -280,11 +322,42 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
 
           {/* Right */}
           <div className={styles.controlsRight}>
+            {/* Quality selector */}
+            {qualityLevels.length > 0 && (
+              <div className={styles.rateWrap}>
+                <button
+                  className={styles.controlBtn}
+                  onClick={e => { e.stopPropagation(); setShowQualityMenu(!showQualityMenu); setShowRateMenu(false) }}
+                >
+                  <span className={styles.rateText}>{qualityLabel}</span>
+                </button>
+                {showQualityMenu && (
+                  <div className={styles.rateMenu}>
+                    <button
+                      className={`${styles.rateOption} ${currentLevel === -1 ? styles.rateActive : ''}`}
+                      onClick={e => { e.stopPropagation(); changeQuality(-1) }}
+                    >
+                      Auto
+                    </button>
+                    {qualityLevels.map((level, i) => (
+                      <button
+                        key={i}
+                        className={`${styles.rateOption} ${currentLevel === i ? styles.rateActive : ''}`}
+                        onClick={e => { e.stopPropagation(); changeQuality(i) }}
+                      >
+                        {level.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Playback rate */}
             <div className={styles.rateWrap}>
               <button
                 className={styles.controlBtn}
-                onClick={e => { e.stopPropagation(); setShowRateMenu(!showRateMenu) }}
+                onClick={e => { e.stopPropagation(); setShowRateMenu(!showRateMenu); setShowQualityMenu(false) }}
               >
                 <span className={styles.rateText}>{playbackRate}x</span>
               </button>
@@ -304,7 +377,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
             </div>
 
             {/* Fullscreen */}
-            <button className={styles.controlBtn} onClick={toggleFullscreen}>
+            <button className={styles.controlBtn} onClick={e => { e.stopPropagation(); toggleFullscreen() }}>
               {isFullscreen
                 ? <Minimize size={18} color="white" />
                 : <Maximize size={18} color="white" />

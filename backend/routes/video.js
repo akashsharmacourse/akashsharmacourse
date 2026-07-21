@@ -1,6 +1,6 @@
 import express from 'express'
 import { db, auth } from '../config/firebase.js'
-import { generateSignedVideoUrl, generateSignedPdfUrl } from '../utils/pdfWatermark.js'
+import { generateSignedVideoUrl, generateSignedPdfUrl, generateHLSUrl } from '../utils/pdfWatermark.js'
 
 const router = express.Router()
 
@@ -50,6 +50,52 @@ router.get('/signed-url/:publicId', verifyToken, async (req, res) => {
   } catch (err) {
     console.error('Signed URL error:', err)
     res.status(500).json({ error: 'Failed to generate URL' })
+  }
+})
+
+// GET HLS streaming URL
+router.get('/hls-url/:publicId', verifyToken, async (req, res) => {
+  try {
+    const { publicId } = req.params
+    const uid = req.user.uid
+
+    const userRef = db.collection('users').doc(uid)
+    const userSnap = await userRef.get()
+
+    if (!userSnap.exists) {
+      return res.status(403).json({ error: 'User not found' })
+    }
+
+    const userData = userSnap.data()
+
+    // Check course access
+    if (!userData.hasAccess) {
+      return res.status(403).json({ error: 'No course access' })
+    }
+
+    // Check expiry
+    if (userData.accessExpiresAt) {
+      const expiry = new Date(userData.accessExpiresAt)
+      if (new Date() > expiry) {
+        return res.status(403).json({ error: 'Access expired' })
+      }
+    }
+
+    const hlsUrl = generateHLSUrl(
+      decodeURIComponent(publicId),
+      userData.name || 'Student',
+      userData.email || ''
+    )
+
+    res.json({
+      success: true,
+      hlsUrl,
+      studentName: userData.name || 'Student',
+      studentEmail: userData.email || ''
+    })
+  } catch (err) {
+    console.error('HLS URL error:', err)
+    res.status(500).json({ error: 'Failed to generate HLS URL' })
   }
 })
 

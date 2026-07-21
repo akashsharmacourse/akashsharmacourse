@@ -70,3 +70,17 @@ export function generateSignedPdfUrl(publicId) {
 
   return signedUrl
 }
+
+export function generateHLSUrl(publicId, studentName, studentEmail) {
+  const timestamp = Math.floor(Date.now() / 1000) + (2 * 60 * 60)
+
+  const hlsUrl = cloudinary.url(publicId, {
+    resource_type: 'video',
+    type: 'upload',
+    sign_url: true,
+    expires_at: timestamp,
+    format: 'm3u8',
+  })
+
+  return hlsUrl
+}
