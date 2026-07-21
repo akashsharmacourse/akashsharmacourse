@@ -14,16 +14,26 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
 const uploadToCloudinary = async (file, resourceType = 'video') => {
   try {
-    // Get upload signature from backend
+    console.log('Starting upload:', file.name, 'type:', resourceType)
+
+    // Get signature
     const signRes = await fetch(`${BACKEND_URL}/api/upload/sign`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
       },
-      body: JSON.stringify({ folder: 'courses', resource_type: resourceType }),
+      body: JSON.stringify({
+        folder: 'courses',
+        resource_type: resourceType === 'pdf' ? 'raw' : resourceType,
+      }),
     })
     const signData = await signRes.json()
+    console.log('Sign response:', signData)
+
+    if (!signData.success) {
+      throw new Error('Sign failed: ' + JSON.stringify(signData))
+    }
 
     // Upload to Cloudinary
     const formData = new FormData()
@@ -33,24 +43,24 @@ const uploadToCloudinary = async (file, resourceType = 'video') => {
     formData.append('api_key', signData.apiKey)
     formData.append('folder', signData.folder)
 
+    const cloudinaryType = resourceType === 'pdf' ? 'raw' : resourceType
+
     const uploadRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${signData.cloudName}/${resourceType}/upload`,
+      `https://api.cloudinary.com/v1_1/${signData.cloudName}/${cloudinaryType}/upload`,
       { method: 'POST', body: formData }
     )
     const uploadData = await uploadRes.json()
-    console.log('Cloudinary full response:', uploadData)
+    console.log('Cloudinary response:', uploadData)
 
     if (uploadData.error) {
-      console.error('Cloudinary error:', uploadData.error)
-      throw new Error(uploadData.error.message)
+      throw new Error('Cloudinary error: ' + uploadData.error.message)
     }
 
     if (!uploadData.public_id) {
-      console.error('No public_id in response:', uploadData)
-      throw new Error('Upload failed — no public_id returned')
+      throw new Error('No public_id returned')
     }
 
-    console.log('public_id:', uploadData.public_id)
+    console.log('Upload success! public_id:', uploadData.public_id)
     return uploadData.public_id
 
   } catch (err) {
@@ -58,6 +68,7 @@ const uploadToCloudinary = async (file, resourceType = 'video') => {
     throw err
   }
 }
+
 
 export default function CourseDetail() {
   const { courseId } = useParams()
@@ -213,21 +224,20 @@ export default function CourseDetail() {
     setUploading(true)
 
     try {
-      // Upload video to Cloudinary
+      // Upload video
       setUploadProgress('Uploading video...')
       const videoPublicId = await uploadToCloudinary(videoForm.videoFile, 'video')
+      console.log('Video uploaded:', videoPublicId)
 
       // Upload PDF if exists
       let pdfPublicId = ''
       if (videoForm.pdfFile) {
         setUploadProgress('Uploading PDF...')
         pdfPublicId = await uploadToCloudinary(videoForm.pdfFile, 'raw')
+        console.log('PDF uploaded:', pdfPublicId)
       }
 
-      console.log('videoPublicId:', videoPublicId)
-      console.log('pdfPublicId:', pdfPublicId)
-
-      setUploadProgress('Saving...')
+      setUploadProgress('Saving to database...')
       const chapters = [...(course.chapters || [])]
       const activeChapterIdx = chapters.findIndex(chap => chap.id === activeChapterId)
       if (activeChapterIdx === -1) {
@@ -250,6 +260,7 @@ export default function CourseDetail() {
       ]
       
       await updateDoc(doc(db, 'courses', courseId), { chapters })
+      console.log('Saved to Firestore!')
       
       setLessonModalOpen(false)
       setVideoForm({ title: '', videoFile: null, pdfFile: null, duration: '' })
@@ -257,7 +268,7 @@ export default function CourseDetail() {
       fetchCourseDetail()
     } catch (err) {
       console.error('Add video error:', err)
-      setUploadProgress('Upload failed. Try again.')
+      setUploadProgress('Upload failed: ' + err.message)
     }
     setSaving(false)
     setUploading(false)
@@ -522,9 +533,15 @@ export default function CourseDetail() {
             <label className={styles.label}>PDF Material (optional)</label>
             <input
               type="file"
-              accept=".pdf"
+              accept="application/pdf,.pdf"
               className={styles.input}
-              onChange={e => setVideoForm(p => ({ ...p, pdfFile: e.target.files[0] }))}
+              onChange={e => {
+                const file = e.target.files[0]
+                if (file) {
+                  console.log('PDF selected:', file.name, file.type, file.size)
+                  setVideoForm(p => ({ ...p, pdfFile: file }))
+                }
+              }}
               disabled={uploading}
             />
             {videoForm.pdfFile && (
