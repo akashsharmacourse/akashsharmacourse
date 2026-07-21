@@ -409,7 +409,11 @@ export default function CourseDetail() {
                           return (
                             <div key={video.id} className={styles.lessonItem}>
                               <div className={styles.lessonLeft}>
-                                <Video size={16} className={styles.lessonIcon} />
+                                {video.pdfUrl && !video.videoUrl ? (
+                                  <FileText size={16} className={styles.lessonIcon} />
+                                ) : (
+                                  <Video size={16} className={styles.lessonIcon} />
+                                )}
                                 <span className={styles.lessonTitle}>{video.title}</span>
                                 {video.duration && (
                                   <span className={styles.durationTag}>{video.duration}</span>

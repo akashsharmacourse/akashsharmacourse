@@ -481,3 +481,17 @@
   .controls { opacity: 1; }
   .volumeSlider { width: 40px; }
 }
+
+.pdfOnlyLesson {
+  aspect-ratio: 16/9;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.pdfBigIcon { color: var(--accent); opacity: 0.6; }
+.pdfOnlyLesson p { font-size: 14px; color: var(--text-secondary); }

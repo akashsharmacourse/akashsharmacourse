@@ -502,14 +502,29 @@ export default function CoursePlayer() {
         <div className={styles.playerSection}>
           {activeVideo ? (
             <>
-              <SecureVideoPlayer
-                publicId={activeVideo.videoUrl}
-                studentName={userData?.name || 'Student'}
-                studentEmail={userData?.email || ''}
-              />
+              {activeVideo.videoUrl ? (
+                <SecureVideoPlayer
+                  publicId={activeVideo.videoUrl}
+                  studentName={userData?.name || 'Student'}
+                  studentEmail={userData?.email || ''}
+                />
+              ) : (
+                <div className={styles.pdfOnlyLesson}>
+                  <FileText size={48} className={styles.pdfBigIcon} />
+                  <p>This lesson contains study material only</p>
+                  <button
+                    className={styles.pdfBtn}
+                    onClick={() => openPdf(activeVideo.pdfUrl)}
+                  >
+                    <FileText size={15} />
+                    Open Study Material
+                  </button>
+                </div>
+              )}
+
               <div className={styles.videoInfo}>
                 <h2 className={styles.videoTitle}>{activeVideo.title}</h2>
-                {activeVideo.pdfUrl && (
+                {activeVideo.pdfUrl && activeVideo.videoUrl && (
                   <button
                     className={styles.pdfBtn}
                     onClick={() => openPdf(activeVideo.pdfUrl)}
@@ -580,9 +595,14 @@ export default function CoursePlayer() {
                           activeVideo?.videoIdx === vi
                             ? styles.activeVideo : ''
                         }`}
-                        onClick={() => setActiveVideo({
-                          ...video, chapterIdx: ci, videoIdx: vi
-                        })}
+                         onClick={() => {
+                          setActiveVideo({
+                            ...video, chapterIdx: ci, videoIdx: vi
+                          })
+                          if (!video.videoUrl && video.pdfUrl) {
+                            openPdf(video.pdfUrl)
+                          }
+                        }}
                       >
                         <div className={styles.videoBtnLeft}>
                           {isCompleted(ci, vi) ? (
