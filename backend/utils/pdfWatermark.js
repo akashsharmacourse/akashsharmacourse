@@ -65,6 +65,7 @@ export function generateSignedPdfUrl(publicId) {
     type: 'upload',
     sign_url: true,
     expires_at: timestamp,
+    flags: 'attachment:false',
   })
 
   return signedUrl

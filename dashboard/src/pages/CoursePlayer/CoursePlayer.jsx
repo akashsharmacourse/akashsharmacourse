@@ -324,6 +324,8 @@ export default function CoursePlayer() {
   const [activeVideo, setActiveVideo] = useState(null)
   const [expandedChapter, setExpandedChapter] = useState(0)
   const [completing, setCompleting] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
+  const [showPdf, setShowPdf] = useState(false)
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -457,7 +459,8 @@ export default function CoursePlayer() {
       })
       const data = await res.json()
       if (data.success) {
-        window.open(data.url, '_blank')
+        setPdfUrl(data.url)
+        setShowPdf(true)
       }
     } catch (err) {
       console.error('PDF open error:', err)
@@ -624,6 +627,25 @@ export default function CoursePlayer() {
           </div>
         </aside>
       </div>
+
+      {showPdf && pdfUrl && (
+        <div className={styles.pdfModal}>
+          <div className={styles.pdfModalHeader}>
+            <span>Study Material</span>
+            <button
+              className={styles.pdfCloseBtn}
+              onClick={() => { setShowPdf(false); setPdfUrl(null) }}
+            >
+              ✕
+            </button>
+          </div>
+          <iframe
+            src={pdfUrl}
+            className={styles.pdfIframe}
+            title="Study Material"
+          />
+        </div>
+      )}
     </div>
   )
 }
