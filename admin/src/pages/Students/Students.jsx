@@ -111,6 +111,17 @@ export default function Students() {
     }))
   }
 
+  const toggleAccess = async (student) => {
+    try {
+      await updateDoc(doc(db, 'users', student.id), {
+        hasAccess: student.hasAccess === false ? true : false
+      })
+      fetchData()
+    } catch (err) {
+      console.error('Toggle access error:', err)
+    }
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -136,7 +147,12 @@ export default function Students() {
                     {student.name?.charAt(0).toUpperCase() || 'S'}
                   </div>
                   <div className={styles.meta}>
-                    <h3 className={styles.name}>{student.name || 'Student'}</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <h3 className={styles.name}>{student.name || 'Student'}</h3>
+                      <span className={`${styles.accessBadge} ${student.hasAccess !== false ? styles.active : styles.inactive}`}>
+                        {student.hasAccess !== false ? 'Active' : 'Revoked'}
+                      </span>
+                    </div>
                     <span className={styles.email}>
                       <Mail size={12} />
                       {student.email || 'No email'}
@@ -194,6 +210,13 @@ export default function Students() {
                     onClick={() => openEnrollment(student)}
                   >
                     Manage Courses
+                  </button>
+                  <button
+                    className={styles.accessBtn}
+                    onClick={() => toggleAccess(student)}
+                    title={student.hasAccess === false ? 'Grant Access' : 'Revoke Access'}
+                  >
+                    {student.hasAccess === false ? 'Grant' : 'Revoke'}
                   </button>
                   <button
                     className={styles.deleteBtn}

@@ -251,3 +251,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+.enrollInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.enrollItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.enrollLabel {
+  color: var(--text-muted);
+}
+.enrollValue {
+  font-weight: 600;
+  color: var(--text-primary);
+}

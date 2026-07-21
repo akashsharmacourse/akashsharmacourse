@@ -38,7 +38,7 @@ export const supportData = {
     {
       icon: 'MessageCircle',
       title: 'WhatsApp Support',
-      desc: 'Chat directly with our support team on WhatsApp.',
+      desc: 'Chat directly with Akash Sir on WhatsApp.',
       cta: 'Chat on WhatsApp',
       href: 'https://wa.me/919650213917',
     },
@@ -47,14 +47,7 @@ export const supportData = {
       title: 'Email Support',
       desc: 'Send us an email and we will get back to you.',
       cta: 'Send Email',
-      href: 'mailto:contact@askakashsharma.com',
-    },
-    {
-      icon: 'Phone',
-      title: 'Call Us',
-      desc: 'Speak directly with Akash Sir during office hours.',
-      cta: 'Call Now',
-      href: 'tel:+919650213917',
+      href: 'mailto:akashsharmatrades@gmail.com',
     },
   ],
   faq: [
@@ -65,10 +58,6 @@ export const supportData = {
     {
       q: 'I cannot see my enrolled course.',
       a: 'Please logout and login again. If the issue persists, contact support on WhatsApp.',
-    },
-    {
-      q: 'How do I join a live session?',
-      a: 'Go to Live Sessions page — the join link will appear 15 minutes before the session starts.',
     },
     {
       q: 'Can I download the videos?',

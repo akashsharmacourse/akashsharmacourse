@@ -88,29 +88,32 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Stats overview */}
-          <div className={styles.statsRow}>
-            <div className={styles.statCard}>
-              <BookOpen size={20} className={styles.statIcon} />
-              <div className={styles.statInfo}>
-                <span className={styles.statVal}>{enrolledCount}</span>
-                <span className={styles.statLabel}>Enrolled Courses</span>
+            <div className={styles.enrollInfo}>
+              <div className={styles.enrollItem}>
+                <span className={styles.enrollLabel}>Member Since</span>
+                <span className={styles.enrollValue}>
+                  {userData?.createdAt
+                    ? new Date(userData.createdAt).toLocaleDateString('en-IN')
+                    : '—'}
+                </span>
               </div>
-            </div>
-            <div className={styles.statCard}>
-              <Award size={20} className={styles.statIcon} />
-              <div className={styles.statInfo}>
-                <span className={styles.statVal}>{completedCount}</span>
-                <span className={styles.statLabel}>Completed Lessons</span>
+              <div className={styles.enrollItem}>
+                <span className={styles.enrollLabel}>Completed Lessons</span>
+                <span className={styles.enrollValue}>
+                  {new Set(userData?.completedChapters || []).size}
+                </span>
               </div>
-            </div>
-            <div className={styles.statCard}>
-              <Clock size={20} className={styles.statIcon} />
-              <div className={styles.statInfo}>
-                <span className={styles.statVal}>{watchTime} m</span>
-                <span className={styles.statLabel}>Watch Time</span>
+              <div className={styles.enrollItem}>
+                <span className={styles.enrollLabel}>Overall Progress</span>
+                <span className={styles.enrollValue}>
+                  {Math.min(userData?.progress || 0, 100)}%
+                </span>
+              </div>
+              <div className={styles.enrollItem}>
+                <span className={styles.enrollLabel}>Amount Paid</span>
+                <span className={styles.enrollValue}>
+                  {userData?.paymentAmount ? `₹${userData.paymentAmount.toLocaleString('en-IN')}` : '—'}
+                </span>
               </div>
             </div>
           </div>

@@ -112,3 +112,37 @@
 }
 .saveBtn:hover { opacity: 0.88; }
 .saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.accessBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.accessBadge.active {
+  background: var(--success-dim);
+  color: var(--success);
+}
+.accessBadge.inactive {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.accessBtn {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 12px;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.accessBtn:hover {
+  background: var(--bg-primary);
+  border-color: var(--accent);
+  color: var(--accent);
+}

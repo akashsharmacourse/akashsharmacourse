@@ -538,7 +538,15 @@ export default function CoursePlayer() {
                   <CheckCircle size={16} />
                   {completing ? 'Saving...' : 'Mark Complete'}
                 </button>
-                <button className={styles.nextBtn} onClick={goToNext}>
+                <button
+                  className={styles.nextBtn}
+                  onClick={goToNext}
+                  disabled={!isCompleted(activeVideo?.chapterIdx, activeVideo?.videoIdx)}
+                  style={{
+                    opacity: isCompleted(activeVideo?.chapterIdx, activeVideo?.videoIdx) ? 1 : 0.4,
+                    cursor: isCompleted(activeVideo?.chapterIdx, activeVideo?.videoIdx) ? 'pointer' : 'not-allowed'
+                  }}
+                >
                   Next
                 </button>
               </div>

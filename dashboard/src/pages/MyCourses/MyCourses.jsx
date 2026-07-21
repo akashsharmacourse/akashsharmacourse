@@ -51,7 +51,16 @@ export default function MyCourses() {
             onClick={() => navigate(`/courses/${course.id}`)}
           >
             <div className={styles.thumbnail}>
-              <BookOpen size={32} className={styles.thumbnailIcon} />
+              {course.thumbnailUrl ? (
+                <img
+                  src={course.thumbnailUrl}
+                  alt={course.title}
+                  className={styles.thumbnailImg}
+                  loading="lazy"
+                />
+              ) : (
+                <BookOpen size={32} className={styles.thumbnailIcon} />
+              )}
             </div>
             <div className={styles.cardContent}>
               <h3 className={styles.courseTitle}>{course.title}</h3>

@@ -16,7 +16,7 @@ export default function Courses() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editCourse, setEditCourse] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
-  const [form, setForm] = useState({ title: '', description: '', price: '' })
+  const [form, setForm] = useState({ title: '', description: '', price: '', thumbnailUrl: '' })
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
 
@@ -34,13 +34,18 @@ export default function Courses() {
 
   const openCreate = () => {
     setEditCourse(null)
-    setForm({ title: '', description: '', price: '' })
+    setForm({ title: '', description: '', price: '', thumbnailUrl: '' })
     setModalOpen(true)
   }
 
   const openEdit = (course) => {
     setEditCourse(course)
-    setForm({ title: course.title, description: course.description, price: course.price })
+    setForm({
+      title: course.title,
+      description: course.description,
+      price: course.price,
+      thumbnailUrl: course.thumbnailUrl || ''
+    })
     setModalOpen(true)
   }
 
@@ -53,6 +58,7 @@ export default function Courses() {
           title: form.title,
           description: form.description,
           price: Number(form.price),
+          thumbnailUrl: form.thumbnailUrl || '',
           updatedAt: new Date().toISOString(),
         })
       } else {
@@ -60,6 +66,7 @@ export default function Courses() {
           title: form.title,
           description: form.description,
           price: Number(form.price),
+          thumbnailUrl: form.thumbnailUrl || '',
           published: false,
           chapters: [],
           createdAt: new Date().toISOString(),
@@ -206,6 +213,18 @@ export default function Courses() {
               onChange={e => setForm(p => ({ ...p, price: e.target.value }))}
               placeholder="9999"
             />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Thumbnail Image URL (optional)</label>
+            <input
+              className={styles.input}
+              value={form.thumbnailUrl}
+              onChange={e => setForm(p => ({ ...p, thumbnailUrl: e.target.value }))}
+              placeholder="https://res.cloudinary.com/..."
+            />
+            <span style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+              Cloudinary image URL paste karo
+            </span>
           </div>
           <div className={styles.modalActions}>
             <button className={styles.cancelBtn} onClick={() => setModalOpen(false)}>
