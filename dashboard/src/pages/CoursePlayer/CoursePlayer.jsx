@@ -15,12 +15,13 @@ import styles from './CoursePlayer.module.css'
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
 function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
+  const [videoUrl, setVideoUrl] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const videoRef = useRef(null)
   const containerRef = useRef(null)
   const controlsTimerRef = useRef(null)
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
   const [volume, setVolume] = useState(1)
@@ -46,26 +47,19 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
       const auth = getAuth()
       const token = await auth.currentUser.getIdToken()
       const encodedId = encodeURIComponent(publicId)
-
       const res = await fetch(`${BACKEND_URL}/api/video/signed-url/${encodedId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
       if (data.success) {
-        if (videoRef.current) {
-          videoRef.current.src = data.url
-          videoRef.current.load()
-        }
-        setLoading(false)
+        setVideoUrl(data.url)
       } else {
         setError('Failed to load video.')
-        setLoading(false)
       }
-    } catch (err) {
-      console.error('Fetch signed URL error:', err)
+    } catch {
       setError('Failed to load video.')
-      setLoading(false)
     }
+    setLoading(false)
   }
 
   const formatTime = (sec) => {
@@ -84,10 +78,9 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
   }
 
   const togglePlay = () => {
-    const video = videoRef.current
-    if (!video) return
-    if (video.paused) { video.play(); setPlaying(true) }
-    else { video.pause(); setPlaying(false) }
+    if (!videoRef.current) return
+    if (videoRef.current.paused) { videoRef.current.play(); setPlaying(true) }
+    else { videoRef.current.pause(); setPlaying(false) }
     showControlsTemporarily()
   }
 
@@ -168,7 +161,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
       document.removeEventListener('keydown', preventShortcuts)
       clearInterval(devToolsCheck)
     }
-  }, [])
+  }, [videoUrl])
 
   if (loading) return (
     <div className={styles.videoLoading}>
@@ -195,6 +188,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     >
       <video
         ref={videoRef}
+        src={videoUrl}
         className={styles.video}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
@@ -220,15 +214,12 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
         className={`${styles.controls} ${showControls ? styles.controlsVisible : ''}`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Progress bar */}
         <div className={styles.progressBar} onClick={handleSeek}>
           <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           <div className={styles.progressThumb} style={{ left: `${progress}%` }} />
         </div>
 
-        {/* Bottom row */}
         <div className={styles.controlsBottom}>
-          {/* Left */}
           <div className={styles.controlsLeft}>
             <button className={styles.controlBtn} onClick={togglePlay}>
               {playing
@@ -236,7 +227,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
                 : <Play size={18} fill="white" color="white" />
               }
             </button>
-
             <div className={styles.volumeWrap}>
               <button className={styles.controlBtn} onClick={toggleMute}>
                 {muted || volume === 0
@@ -252,15 +242,12 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
                 onClick={e => e.stopPropagation()}
               />
             </div>
-
             <span className={styles.timeDisplay}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
           </div>
 
-          {/* Right */}
           <div className={styles.controlsRight}>
-            {/* Playback rate */}
             <div className={styles.rateWrap}>
               <button
                 className={styles.controlBtn}
@@ -282,8 +269,6 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
                 </div>
               )}
             </div>
-
-            {/* Fullscreen */}
             <button className={styles.controlBtn} onClick={e => { e.stopPropagation(); toggleFullscreen() }}>
               {isFullscreen
                 ? <Minimize size={18} color="white" />
