@@ -395,11 +395,7 @@ export const oneOnOneData = {
       {
         q: "Do I need any prior trading knowledge?",
         a: "No. Whether you are a beginner or experienced trader, Akash Sir guides you step by step.",
-      },
-      {
-        q: "Will I get recordings of live sessions?",
-        a: "Yes. All live chart breakdown sessions are recorded and shared in the private community.",
-      },
+      }
     ],
   },
 
