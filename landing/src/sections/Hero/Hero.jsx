@@ -75,48 +75,50 @@ export function Hero() {
     }, 2000)
   }
 
-  // Always start unmuted
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
-    // Always start unmuted
-    video.muted = false
-    setMuted(false)
+    const isMobile = window.innerWidth <= 768
 
-    const playVideo = async () => {
-      try {
-        await video.play()
+    if (isMobile) {
+      // Mobile — muted autoplay (browser allows this)
+      video.muted = true
+      setMuted(true)
+      video.play().then(() => {
         setPlaying(true)
-        // Force unmute after play
+      }).catch(() => {})
+    } else {
+      // Desktop — unmuted autoplay
+      video.muted = false
+      setMuted(false)
+      video.play().then(() => {
+        setPlaying(true)
         video.muted = false
         setMuted(false)
-      } catch {
-        // Browser blocked — play muted first then unmute
+      }).catch(() => {
+        // Blocked — try muted
         video.muted = true
-        try {
-          await video.play()
+        video.play().then(() => {
           setPlaying(true)
-          // Immediately try to unmute
           setTimeout(() => {
             video.muted = false
             setMuted(false)
           }, 100)
-        } catch {
-          console.log('Autoplay blocked')
-        }
-      }
+        }).catch(() => {})
+      })
     }
-
-    playVideo()
   }, [])
 
   // On page visibility change (reload fix)
   useEffect(() => {
     const handleVisibility = () => {
       if (!document.hidden && videoRef.current) {
-        videoRef.current.muted = false
-        setMuted(false)
+        const isMobile = window.innerWidth <= 768
+        if (!isMobile) {
+          videoRef.current.muted = false
+          setMuted(false)
+        }
         videoRef.current.play().catch(() => {})
       }
     }
