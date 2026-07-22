@@ -1,4 +1,7 @@
-import React, { useRef, useState } from 'react';
+// 
+
+
+import React, { useRef, useState, useEffect } from 'react';
 import { heroData } from '../../data/data.js';
 import { useInView } from '../../hooks/useInView';
 import { useCountUp } from '../../hooks/useCountUp';
@@ -25,8 +28,19 @@ export function Hero() {
 
   const videoRef = useRef(null)
   const [playing, setPlaying] = useState(true)
-  const [muted, setMuted] = useState(true)
+  const [muted, setMuted] = useState(false) // ✅ FALSE - unmuted
   const [progress, setProgress] = useState(0)
+
+  // ✅ Unmuted state ke sath autoplay
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      video.muted = false // ✅ Unmuted
+      video.play().catch(error => {
+        console.log('Autoplay failed:', error)
+      })
+    }
+  }, [])
 
   const togglePlay = () => {
     if (videoRef.current.paused) {
@@ -84,7 +98,6 @@ export function Hero() {
             ref={videoRef}
             className={styles.heroVideo}
             src={heroData.videoUrl}
-            autoPlay
             loop
             playsInline
             controlsList="nodownload"
@@ -110,11 +123,11 @@ export function Hero() {
               <button
                 className={styles.controlBtn}
                 onClick={togglePlay}
-                aria-label={playing ? 'Play' : 'Pause'}
+                aria-label={playing ? 'Pause' : 'Play'}
               >
                 {playing
-                  ? <Play size={16} fill="currentColor" />
-                  : <Pause size={16} fill="currentColor" />
+                  ? <Pause size={16} fill="currentColor" />
+                  : <Play size={16} fill="currentColor" />
                 }
               </button>
 
@@ -152,4 +165,3 @@ export function Hero() {
 }
 
 export default React.memo(Hero);
-
