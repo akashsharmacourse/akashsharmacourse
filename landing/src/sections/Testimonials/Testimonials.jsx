@@ -100,10 +100,6 @@ export function Testimonials() {
                     <div className={styles.placeholder} />
                   )}
                 </div>
-                <div className={styles.info}>
-                  <span className={styles.name}>{t.name}</span>
-                  <span className={styles.role}>{t.role}</span>
-                </div>
               </div>
             ))}
           </div>

@@ -38,7 +38,7 @@ export default function EnrollFormPage({ type = 'course' }) {
       })
 
       // STEP 2 — Create Razorpay order
-      const amount = type === 'course' ? 9900 : 24999
+      const amount = type === 'course' ? 9900 : 29999
       const orderRes = await fetch(`${BACKEND_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -68,7 +68,7 @@ export default function OneOnOne() {
             </h1>
             <p className={styles.heroSub}>{hero.subheadline}</p>
             <div className={styles.heroButtons}>
-              <a href="/enroll/1on1" className={styles.btnPrimary}>{hero.ctaPrimary}</a>
+              <a href="/enroll/1to1" className={styles.btnPrimary}>{hero.ctaPrimary}</a>
               <a href="#results" className={styles.btnSecondary}>{hero.ctaSecondary}</a>
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function OneOnOne() {
                 </li>
               ))}
             </ul>
-            <a href="/enroll/1on1" className={styles.pricingCta}>{pricing.cta}</a>
+            <a href="/enroll/1to1" className={styles.pricingCta}>{pricing.cta}</a>
             <p className={styles.pricingNote}>{pricing.note}</p>
             {pricing.guarantee && (
               <p className={styles.guarantee}>
@@ -169,7 +169,16 @@ export default function OneOnOne() {
           <div className={styles.callGrid}>
             {callProof.images.map((img) => (
               <div key={img.id} className={styles.callCard}>
-                <span className={styles.callLabel}>{img.label}</span>
+                {img.placeholder ? (
+                  <div className={styles.callPlaceholder} />
+                ) : (
+                  <img
+                    src={img.image}
+                    alt="Student Result"
+                    className={styles.callImage}
+                    loading="lazy"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -204,7 +213,7 @@ export default function OneOnOne() {
           <p className={styles.urgency}>{cta.urgency}</p>
           <h2 className={styles.ctaHeading}>{cta.heading}</h2>
           <p className={styles.ctaSub}>{cta.subheading}</p>
-          <a href="/enroll/1on1" className={styles.btnPrimary}>{cta.cta}</a>
+          <a href="/enroll/1to1" className={styles.btnPrimary}>{cta.cta}</a>
         </div>
       </section>
 

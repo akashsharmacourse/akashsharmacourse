@@ -3,7 +3,7 @@ export const navData = {
   logo: "AskAkashSharma",
   links: [
     { label: "Home", href: "/" },
-    { label: "1on1", href: "/1on1" },
+    { label: "1to1", href: "/1to1" },
     { label: "Course", href: "/#courses" },
     { label: "Results", href: "/#results" },
   ],
@@ -274,11 +274,11 @@ export const footerData = {
 export const oneOnOneData = {
   // HERO
   hero: {
-    badge: "Exclusive Mentorship",
-    headlineTop: "Trade With a Pro.",
-    headlineBottom: "By Your Side.",
-    subheadline: "Get personalised, one-on-one coaching directly from Akash Sharma — tailored to your trading goals, your portfolio, and your schedule.",
-    ctaPrimary: "Book Your Session",
+    badge: "Private Trading Access",
+    headlineTop: "Trade With Akash Sir.",
+    headlineBottom: "Live. Every Day.",
+    subheadline: "Get exclusive 2-week private access — daily live chart analysis, trade setups shared one day in advance, and direct mentorship from Akash Sir.",
+    ctaPrimary: "Get Access Now",
     ctaSecondary: "View Results",
     image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079548/AkashSharma_pawjik.png",
     imageAlt: "Akash Sharma — Personal Trading Coach",
@@ -287,37 +287,38 @@ export const oneOnOneData = {
   // WHAT YOU GET
   benefits: {
     badge: "What You Get",
-    heading: "Everything in One Session",
+    heading: "2 Weeks of Private Access",
+    subheading: "Not a course. Not a recording. Live trading mentorship — every single day.",
     items: [
       {
-        icon: "Target",
-        title: "Personalised Strategy",
-        desc: "A trading plan built specifically around your risk appetite, capital, and goals.",
+        icon: "TrendingUp",
+        title: "Daily Chart Analysis",
+        desc: "Akash Sir analyses markets live — every trading day for 2 full weeks.",
       },
       {
-        icon: "LineChart",
-        title: "Live Chart Analysis",
-        desc: "Akash Sir analyses your watchlist live — entry, exit, stop loss defined on the spot.",
-      },
-      {
-        icon: "ShieldCheck",
-        title: "Risk Management",
-        desc: "Learn exactly how much to risk per trade — never blow your account again.",
+        icon: "Calendar",
+        title: "Next Day Trade Setups",
+        desc: "Get exact entry, exit and stop-loss levels shared one day in advance.",
       },
       {
         icon: "MessageCircle",
         title: "Direct WhatsApp Access",
-        desc: "Post-session WhatsApp support for 7 days — ask anything, anytime.",
+        desc: "Ask anything, anytime — direct access to Akash Sir on WhatsApp.",
       },
       {
-        icon: "Clock",
-        title: "60 Minute Deep Dive",
-        desc: "Focused, distraction-free session — no generic advice, only what you need.",
+        icon: "Users",
+        title: "Private Community",
+        desc: "Exclusive group with serious traders — updates, setups and live discussions.",
       },
       {
-        icon: "RefreshCw",
-        title: "Session Recording",
-        desc: "Full recording of your session sent to you — revisit anytime.",
+        icon: "ShieldCheck",
+        title: "Risk Management",
+        desc: "Learn position sizing and capital protection in real market conditions.",
+      },
+      {
+        icon: "LineChart",
+        title: "Weekend Reviews",
+        desc: "Weekly recap of all trades — what worked, what did not and why.",
       },
     ],
   },
@@ -325,21 +326,21 @@ export const oneOnOneData = {
   // PRICING
   pricing: {
     badge: "Investment",
-    heading: "One Session. Life-Changing Clarity.",
+    heading: "2 Weeks. Life-Changing Clarity.",
     originalPrice: "₹49,999",
-    currentPrice: "₹24,999",
-    discount: "50% OFF",
+    currentPrice: "₹29,999",
+    discount: "40% OFF",
     features: [
-      "60-minute one-on-one live session with Akash Sir",
-      "Personalised trading plan for your portfolio",
-      "Live chart analysis on your watchlist",
-      "Risk management framework tailored to you",
-      "7-day WhatsApp follow-up support",
-      "Full session recording delivered to you",
-      "Actionable entry and exit levels",
+      "2 weeks of private trading access",
+      "Daily live chart analysis — every trading day",
+      "Trade setups shared one day in advance",
+      "Direct WhatsApp access to Akash Sir",
+      "Entry, exit and stop-loss levels shared daily",
+      "Weekend review sessions",
+      "Exclusive private community access",
     ],
-    cta: "Book Your Session",
-    note: "One-time payment. Session scheduled within 48 hours.",
+    cta: "Get Access Now",
+    note: "One-time payment. Instant access via WhatsApp.",
     guarantee: "",
     paymentMethods: [
       {
@@ -363,50 +364,46 @@ export const oneOnOneData = {
 
   // CALL IMAGES
   callProof: {
-    badge: "Session Previews",
-    heading: "What a Session Looks Like",
-    subheading: "Real sessions. Real students. Real results.",
+    badge: "Student Results",
+    heading: "Real Results from Our Students",
+    subheading: "Real results. Real students. Shared with permission.",
     images: [
-      { id: 1, placeholder: true, label: "Session Screenshot 1" },
-      { id: 2, placeholder: true, label: "Session Screenshot 2" },
-      { id: 3, placeholder: true, label: "Session Screenshot 3" },
+      { id: 1, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2336_owfzmn.jpg", label: "Student Result 1" },
+      { id: 2, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2338_zufbg0.jpg", label: "Student Result 2" },
+      { id: 3, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2339_fpx45j.jpg", label: "Student Result 3" },
     ],
   },
 
   // FAQ
   faq: {
     badge: "FAQ",
-    heading: "Questions About 1-on-1",
+    heading: "Questions About 1to1 Access",
     faqs: [
       {
-        q: "How long is each session?",
-        a: "Each session is 60 minutes — focused, structured, and tailored entirely to you.",
-      },
-      {
         q: "How do I book after payment?",
-        a: "After payment you will receive a WhatsApp message from Akash Sir within 24 hours to schedule your session at a mutually convenient time.",
+        a: "Pay via Razorpay → Fill the form → Pay the amount → Book your first session via Calendly link sent on WhatsApp → More updates will keep coming via WhatsApp.",
       },
       {
         q: "What platform is the session on?",
-        a: "Sessions are conducted on Google Meet or Zoom — whichever you prefer.",
+        a: "Sessions and updates are delivered directly via WhatsApp and Google Meet.",
       },
       {
         q: "Do I need any prior trading knowledge?",
-        a: "No. Whether you are a complete beginner or an experienced trader looking to refine your edge — the session is customised for your level.",
+        a: "No. Whether you are a beginner or experienced trader, Akash Sir guides you step by step.",
       },
       {
-        q: "Will I get the session recording?",
-        a: "Yes. The full recording is sent to you via WhatsApp within 24 hours of the session.",
+        q: "Will I get recordings of live sessions?",
+        a: "Yes. All live chart breakdown sessions are recorded and shared in the private community.",
       },
     ],
   },
 
   // CTA
   cta: {
-    heading: "Ready for Personalised Coaching?",
-    subheading: "Limited slots available each month. Book before they fill up.",
+    heading: "Ready for Private Mentorship?",
+    subheading: "Limited slots available each month. Get access before seats fill up.",
     urgency: "Only a few slots remaining this month",
-    cta: "Book Your Session Now",
+    cta: "Get Access Now",
   },
 };
 
@@ -426,8 +423,8 @@ export const formData = {
     originalPrice: "₹15,999",
   },
   oneOnOne: {
-    heading: "Book Your 1-on-1 Session",
-    price: "₹24,999",
+    heading: "Get 1to1 Private Trading Access",
+    price: "₹29,999",
     originalPrice: "₹49,999",
   },
 };

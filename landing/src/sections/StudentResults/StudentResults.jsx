@@ -32,13 +32,11 @@ export function StudentResults() {
               style={{ '--i': i }}
             >
               {result.placeholder ? (
-                <div className={styles.placeholder}>
-                  <span className={styles.placeholderLabel}>{result.label}</span>
-                </div>
+                <div className={styles.placeholder} />
               ) : (
                 <img
                   src={result.image}
-                  alt={result.label}
+                  alt="Student Result"
                   className={styles.image}
                   loading="lazy"
                 />

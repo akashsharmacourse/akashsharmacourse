@@ -74,8 +74,10 @@ function Layout() {
   const hideLayout = [
     '/enroll',
     '/enroll/1on1', 
+    '/enroll/1to1', 
     '/success/course',
     '/success/1on1',
+    '/success/1to1',
   ];
   
   const shouldHide = hideLayout.includes(location.pathname);
@@ -86,12 +88,14 @@ function Layout() {
       {!shouldHide && <Navbar />}
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/1on1" element={
+        <Route path="/1to1" element={
           <Suspense fallback={<div className="sectionLoading"></div>}>
             <OneOnOne />
           </Suspense>
         } />
+        <Route path="/1on1" element={<Navigate to="/1to1" replace />} />
         <Route path="/enroll" element={<EnrollFormPage type="course" />} />
+        <Route path="/enroll/1to1" element={<EnrollFormPage type="1on1" />} />
         <Route path="/enroll/1on1" element={<EnrollFormPage type="1on1" />} />
         <Route path="/success/course" element={
           <SuccessRoute>
@@ -99,6 +103,11 @@ function Layout() {
           </SuccessRoute>
         } />
         <Route path="/success/1on1" element={
+          <SuccessRoute>
+            <OneOnOneSuccess />
+          </SuccessRoute>
+        } />
+        <Route path="/success/1to1" element={
           <SuccessRoute>
             <OneOnOneSuccess />
           </SuccessRoute>
