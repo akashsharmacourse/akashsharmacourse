@@ -35,7 +35,7 @@ export function Pricing() {
             </div>
 
             {/* Title Offer */}
-            <h3 className={styles.offerTitle}>LIFETIME ACCESS PROGRAMME</h3>
+            <h3 className={styles.offerTitle}>STOCK MARKET MASTERY PROGRAMME</h3>
             <p className={styles.offerSubtitle}>Get three entire strategy systems for a single price</p>
 
             {/* Pricing Section */}

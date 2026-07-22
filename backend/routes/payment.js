@@ -89,7 +89,7 @@ router.post('/verify', async (req, res) => {
         const sheetId = process.env.GOOGLE_SHEET_ID_COURSE
         await updatePaymentStatus(sheetId, 'Leads', email, 'paid')
         await appendToSheet(sheetId, 'Enrollments', [
-          timestamp, name, email, phone, '₹9,999', 'active'
+          timestamp, name, email, phone, '₹9,900', 'active'
         ])
         console.log('Sheet updated successfully')
       } catch (sheetErr) {
@@ -141,7 +141,7 @@ router.post('/verify', async (req, res) => {
           watchTimeMinutes: 0,
           createdAt: new Date().toISOString(),
           accessExpiresAt: accessExpiresAt.toISOString(),
-          paymentAmount: 9999,
+          paymentAmount: 9900,
           paymentId: razorpay_payment_id,
         }, { merge: true })
         console.log('Firestore updated successfully')

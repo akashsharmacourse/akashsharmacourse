@@ -33,10 +33,10 @@ export const trustStripData = {
   items: [
     "1,000+ Students Enrolled",
     "10+ Years Experience",
-    "Lifetime Support",
+    "WhatsApp Support",
     "One Proven Strategy",
     "Simplified Approach",
-    "Personalised Sessions",
+    "Live Session Recordings",
     "Verified PnL",
     "600+ Five-Star Reviews",
     "100% Satisfaction Guarantee",
@@ -65,20 +65,18 @@ export const courseData = {
       {
         icon: "TrendingUp",
         title: "Mastering Swing Trading",
-        desc: "Minimum 1:5 risk-reward ratio on every swing trade setup.",
+        desc: "Identify high-probability swing setups with clear entry and exit points.",
       },
     ],
     benefits: [
-      "Lifetime access to all course content",
-      "Personalised one-on-one online sessions",
-      "Lifetime WhatsApp support from Akash Sir",
+      "Access to all course content",
+      "WhatsApp support from Akash Sir",
       "Private student community access",
       "Live session recordings",
       "PDF study materials included",
-      "Free updates — forever",
     ],
     originalPrice: "₹15,999",
-    currentPrice: "₹9,999",
+    currentPrice: "₹9,900",
     discount: "38% OFF",
     cta: "Enroll Now",
     note: "One-time payment. No subscription. No hidden fees.",
@@ -175,20 +173,18 @@ export const testimonialsData = {
 // ─── PRICING ──────────────────────────────────────────
 export const pricingData = {
   badge: "Pricing",
-  heading: "One Price. Lifetime Access.",
+  heading: "One Price. Complete Access.",
   subheading: "No hidden fees. No subscriptions. Pay once, learn forever.",
   originalPrice: "₹15,999",
-  currentPrice: "₹9,999",
+  currentPrice: "₹9,900",
   discount: "38% OFF — Limited Time",
   features: [
     "All 3 Course Modules — Long Term, Intraday, Swing",
-    "Lifetime Access to Course Content",
-    "Personalised One-on-One Online Sessions",
-    "Lifetime Support via WhatsApp",
+    "Access to Course Content",
+    "WhatsApp Support from Akash Sir",
     "Private Student Community Access",
     "Live Session Recordings",
     "PDF Study Materials",
-    "Free Updates Forever",
   ],
   cta: "Enroll Now",
   guarantee: "",
@@ -228,7 +224,7 @@ export const faqData = {
     },
     {
       q: "What do I get after enrolling?",
-      a: "Immediate access to all 3 modules, PDF materials, private WhatsApp community, and lifetime one-on-one support from Akash Sir.",
+      a: "Immediate access to all 3 modules, PDF materials, private WhatsApp community, and WhatsApp support from Akash Sir.",
     },
     {
       q: "Do I need a Demat account before joining?",
@@ -236,11 +232,11 @@ export const faqData = {
     },
     {
       q: "How long does it take to complete?",
-      a: "Most students complete the core content within 2 to 4 weeks. Lifetime access means you revisit any lesson anytime.",
+      a: "Most students complete the core content within 2 to 4 weeks. You can revisit any lesson anytime.",
     },
     {
       q: "Will I get support after completing the course?",
-      a: "Absolutely. Lifetime support. Reach out with any question — even years later — and Akash Sir will personally respond.",
+      a: "Absolutely. WhatsApp support included. Reach out with any question — even years later — and Akash Sir will personally respond.",
     },
     {
       q: "How is this different from free YouTube content?",
@@ -430,7 +426,7 @@ export const formData = {
   note: "Your details are safe and secure.",
   course: {
     heading: "Enroll in Stock Market Mastery",
-    price: "₹9,999",
+    price: "₹9,900",
     originalPrice: "₹15,999",
   },
   oneOnOne: {

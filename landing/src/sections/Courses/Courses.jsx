@@ -77,7 +77,7 @@ export function Courses() {
                 </div>
                 <div className={styles.priceRow}>
                   <span className={styles.priceVal}>{offer.currentPrice}</span>
-                  <span className={styles.pricePeriod}>/ LIFETIME ACCESS</span>
+                  <span className={styles.pricePeriod}>/ ONE-TIME</span>
                 </div>
               </div>
 
