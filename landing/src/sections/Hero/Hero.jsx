@@ -85,7 +85,7 @@ export function Hero() {
             className={styles.heroVideo}
             src={heroData.videoUrl}
             autoPlay
-            muted
+            // muted
             loop
             playsInline
             controlsList="nodownload"

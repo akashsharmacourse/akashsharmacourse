@@ -69,7 +69,7 @@ export const courseData = {
       },
     ],
     benefits: [
-      "Access to all course content",
+      "Access to course content",
       "WhatsApp support from Akash Sir",
       "Private student community access",
       "Live session recordings",
@@ -79,7 +79,7 @@ export const courseData = {
     currentPrice: "₹9,900",
     discount: "38% OFF",
     cta: "Enroll Now",
-    note: "One-time payment. No subscription. No hidden fees.",
+    note: "One-time payment. Learn at your own pace.",
   },
 };
 
@@ -170,19 +170,20 @@ export const testimonialsData = {
 export const pricingData = {
   badge: "Pricing",
   heading: "One Price. Complete Access.",
-  subheading: "No hidden fees. No subscriptions. Pay once, learn forever.",
+  subheading: "No hidden fees. No subscriptions. Pay once, learn at your own pace.",
   originalPrice: "₹15,999",
   currentPrice: "₹9,900",
   discount: "38% OFF — Limited Time",
   features: [
     "All 3 Course Modules — Long Term, Intraday, Swing",
-    "Access to Course Content",
+    "Access to course content",
     "WhatsApp Support from Akash Sir",
     "Private Student Community Access",
     "Live Session Recordings",
     "PDF Study Materials",
   ],
   cta: "Enroll Now",
+  note: "One-time payment. Learn at your own pace.",
   guarantee: "",
   paymentNote: "Secure payment via Razorpay",
   paymentMethods: [
@@ -253,6 +254,10 @@ export const ctaData = {
 export const footerData = {
   logo: "AskAkashSharma",
   tagline: "Empowering Indian traders since 2014.",
+  phone: "+91 97176 50451",
+  contact: {
+    phone: "+91 97176 50451",
+  },
   links: [
     { label: "Home", href: "#hero" },
     { label: "Course", href: "#courses" },
@@ -261,7 +266,7 @@ export const footerData = {
     { label: "FAQ", href: "#faq" },
   ],
   social: [
-    { label: "WhatsApp", href: "https://wa.me/919650213917" },
+    { label: "WhatsApp", href: "https://wa.me/919717650451" },
     { label: "Mail", href: "mailto:akashsharmatrades@gmail.com" },
     { label: "Instagram", href: "https://www.instagram.com/askakashsharma.in?igsh=ejhxNDdjOTQwZzcx" },
     { label: "Facebook", href: "https://www.facebook.com/share/19UHkfBT1J/?mibextid=wwXIfr" },
@@ -481,7 +486,7 @@ export const oneOnOneSuccessData = {
   calendlyCta: "Book Your Session Slot",
   calendlyLink: "https://calendly.com/akash/1on1",
   whatsappCta: "Join WhatsApp Group",
-  whatsappLink: "https://wa.me/919650213917",
+  whatsappLink: "https://wa.me/919717650451",
   note: "Session will be scheduled within 48 hours of booking.",
 };
 

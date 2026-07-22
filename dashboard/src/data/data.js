@@ -40,7 +40,7 @@ export const supportData = {
       title: 'WhatsApp Support',
       desc: 'Chat directly with Akash Sir on WhatsApp.',
       cta: 'Chat on WhatsApp',
-      href: 'https://wa.me/919650213917',
+      href: 'https://wa.me/919717650451',
     },
     {
       icon: 'Mail',
