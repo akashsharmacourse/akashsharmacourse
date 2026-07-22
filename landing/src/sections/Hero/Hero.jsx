@@ -113,8 +113,8 @@ export function Hero() {
                 aria-label={playing ? 'Play' : 'Pause'}
               >
                 {playing
-                  ? <Pause size={16} fill="currentColor" />
-                  : <Play size={16} fill="currentColor" />
+                  ? <Play size={16} fill="currentColor" />
+                  : <Pause size={16} fill="currentColor" />
                 }
               </button>
 
