@@ -63,7 +63,7 @@ export function Navbar() {
             <li key={link.label}>
               <a 
                 href={link.href} 
-                className={styles.link}
+                className={`${styles.link} ${link.label === '1to1' ? styles.highlightLink : ''}`}
                 onClick={(e) => handleNav(e, link.href)}
               >
                 {link.label}
@@ -105,7 +105,7 @@ export function Navbar() {
             >
               <a 
                 href={link.href}
-                className={styles.mobileLink}
+                className={`${styles.mobileLink} ${link.label === '1to1' ? styles.mobileLinkHighlight : ''}`}
                 onClick={(e) => handleNav(e, link.href)}
               >
                 {link.label}

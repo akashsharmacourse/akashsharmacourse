@@ -70,6 +70,17 @@
   color: var(--text-primary);
 }
 
+.highlightLink {
+  color: var(--accent) !important;
+  font-weight: 700 !important;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 4px 12px !important;
+}
+.mobileLinkHighlight {
+  color: var(--accent) !important;
+}
+
 /* Desktop CTA */
 .ctaBtn {
   display: inline-flex;

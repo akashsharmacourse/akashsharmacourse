@@ -1,31 +1,79 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { testimonialsData } from '../../data/data.js'
 import { useInView } from '../../hooks/useInView'
-import { Volume2, VolumeX } from 'lucide-react'
+import { Volume2, VolumeX, Play, Pause } from 'lucide-react'
 import styles from './Testimonials.module.css'
 
-export function Testimonials() {
+export default function Testimonials() {
   const [ref, inView] = useInView()
   const [active, setActive] = useState(0)
   const [mutedStates, setMutedStates] = useState(
     testimonialsData.testimonials.map(() => true)
   )
+  const [playingStates, setPlayingStates] = useState(
+    testimonialsData.testimonials.map(() => false)
+  )
+  const [progressStates, setProgressStates] = useState(
+    testimonialsData.testimonials.map(() => 0)
+  )
   const videoRefs = useRef([])
   const startX = useRef(0)
   const total = testimonialsData.testimonials.length
 
-  // Pause all videos except active
+  // Detect mobile
+  const isMobile = () => window.innerWidth <= 768
+
   useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (!video) return
+
+      // Load video src only when needed
+      if (i === active && !video.src) {
+        video.src = testimonialsData.testimonials[i].videoUrl
+        video.load()
+      }
+
       if (i === active) {
-        video.play().catch(() => {})
+        if (isMobile()) {
+          // Mobile — autoplay muted
+          video.muted = true
+          video.play().catch(() => {})
+          const newPlaying = [...playingStates]
+          newPlaying[i] = true
+          setPlayingStates(newPlaying)
+        } else {
+          // Desktop — pause, wait for user
+          video.pause()
+          const newPlaying = [...playingStates]
+          newPlaying[i] = false
+          setPlayingStates(newPlaying)
+        }
       } else {
         video.pause()
         video.currentTime = 0
+        const newPlaying = [...playingStates]
+        newPlaying[i] = false
+        setPlayingStates(newPlaying)
       }
     })
   }, [active])
+
+  const togglePlay = (e, idx) => {
+    e.stopPropagation()
+    const video = videoRefs.current[idx]
+    if (!video) return
+    if (video.paused) {
+      video.play()
+      const newPlaying = [...playingStates]
+      newPlaying[idx] = true
+      setPlayingStates(newPlaying)
+    } else {
+      video.pause()
+      const newPlaying = [...playingStates]
+      newPlaying[idx] = false
+      setPlayingStates(newPlaying)
+    }
+  }
 
   const toggleMute = (e, idx) => {
     e.stopPropagation()
@@ -35,6 +83,23 @@ export function Testimonials() {
     if (videoRefs.current[idx]) {
       videoRefs.current[idx].muted = newMuted[idx]
     }
+  }
+
+  const handleTimeUpdate = (idx) => {
+    const video = videoRefs.current[idx]
+    if (!video || !video.duration) return
+    const newProgress = [...progressStates]
+    newProgress[idx] = (video.currentTime / video.duration) * 100
+    setProgressStates(newProgress)
+  }
+
+  const handleSeek = (e, idx) => {
+    e.stopPropagation()
+    const bar = e.currentTarget
+    const rect = bar.getBoundingClientRect()
+    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    const video = videoRefs.current[idx]
+    if (video) video.currentTime = percent * video.duration
   }
 
   const handleDragStart = (e) => {
@@ -76,25 +141,60 @@ export function Testimonials() {
                     <>
                       <video
                         ref={el => videoRefs.current[i] = el}
-                        src={t.videoUrl}
+                        src={i === active ? t.videoUrl : undefined}
                         className={styles.video}
-                        autoPlay={i === 0}
                         muted={mutedStates[i]}
                         loop
                         playsInline
+                        preload={i === active ? "auto" : "none"}
+                        onTimeUpdate={() => handleTimeUpdate(i)}
                         onContextMenu={e => e.preventDefault()}
                       />
-                      {/* Mute/Unmute button */}
+
+                      {/* Center play button — desktop only */}
                       <button
-                        className={styles.muteBtn}
-                        onClick={(e) => toggleMute(e, i)}
-                        aria-label={mutedStates[i] ? 'Unmute' : 'Mute'}
+                        className={`${styles.centerPlayBtn} ${playingStates[i] ? styles.hidden : ''}`}
+                        onClick={(e) => togglePlay(e, i)}
+                        aria-label="Play"
                       >
-                        {mutedStates[i]
-                          ? <VolumeX size={16} />
-                          : <Volume2 size={16} />
-                        }
+                        <Play size={28} fill="white" color="white" />
                       </button>
+
+                      {/* Bottom controls */}
+                      <div className={styles.videoControls}>
+                        {/* Progress bar */}
+                        <div
+                          className={styles.progressBar}
+                          onClick={(e) => handleSeek(e, i)}
+                        >
+                          <div
+                            className={styles.progressFill}
+                            style={{ width: `${progressStates[i]}%` }}
+                          />
+                        </div>
+
+                        {/* Buttons */}
+                        <div className={styles.controlRow}>
+                          <button
+                            className={styles.controlBtn}
+                            onClick={(e) => togglePlay(e, i)}
+                          >
+                            {playingStates[i]
+                              ? <Pause size={14} fill="white" color="white" />
+                              : <Play size={14} fill="white" color="white" />
+                            }
+                          </button>
+                          <button
+                            className={styles.controlBtn}
+                            onClick={(e) => toggleMute(e, i)}
+                          >
+                            {mutedStates[i]
+                              ? <VolumeX size={14} color="white" />
+                              : <Volume2 size={14} color="white" />
+                            }
+                          </button>
+                        </div>
+                      </div>
                     </>
                   ) : (
                     <div className={styles.placeholder} />
@@ -120,5 +220,3 @@ export function Testimonials() {
     </section>
   )
 }
-
-export default React.memo(Testimonials)
