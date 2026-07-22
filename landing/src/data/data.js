@@ -298,12 +298,12 @@ export const oneOnOneData = {
       {
         icon: "TrendingUp",
         title: "Daily Chart Analysis",
-        desc: "Akash Sir analyses markets live — every trading day for 2 full weeks.",
+        desc: "Akash Sir analyses charts with you — every trading day for 2 full weeks.",
       },
       {
         icon: "Calendar",
         title: "Next Day Trade Setups",
-        desc: "Get exact entry, exit and stop-loss levels shared one day in advance.",
+        desc: "Find exact entry, exit and stop-loss levels shared one day in advance.",
       },
       {
         icon: "MessageCircle",
@@ -337,10 +337,10 @@ export const oneOnOneData = {
     discount: "40% OFF",
     features: [
       "2 weeks of private trading access",
-      "Daily live chart analysis — every trading day",
+      "Daily chart analysis — every trading day",
       "Trade setups shared one day in advance",
       "Direct WhatsApp access to Akash Sir",
-      "Entry, exit and stop-loss levels shared daily",
+      "Entry, exit and stop-loss levels discussed daily",
       "Weekend review sessions",
       "Exclusive private community access",
     ],
