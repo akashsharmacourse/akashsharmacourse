@@ -28,21 +28,13 @@ export function Hero() {
 
   const videoRef = useRef(null)
   const [playing, setPlaying] = useState(true)
-  const [muted, setMuted] = useState(false) // ✅ FALSE - unmuted
+  const [muted, setMuted] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [showControls, setShowControls] = useState(false)
+  const controlsTimer = useRef(null)
 
-  // ✅ Unmuted state ke sath autoplay
-  useEffect(() => {
-    const video = videoRef.current
-    if (video) {
-      video.muted = false // ✅ Unmuted
-      video.play().catch(error => {
-        console.log('Autoplay failed:', error)
-      })
-    }
-  }, [])
-
-  const togglePlay = () => {
+  const handleVideoClick = () => {
+    if (!videoRef.current) return
     if (videoRef.current.paused) {
       videoRef.current.play()
       setPlaying(true)
@@ -52,8 +44,10 @@ export function Hero() {
     }
   }
 
-  const toggleMute = () => {
-    videoRef.current.muted = !videoRef.current.muted
+  const toggleMute = (e) => {
+    e.stopPropagation()
+    if (!videoRef.current) return
+    videoRef.current.muted = !muted
     setMuted(!muted)
   }
 
@@ -64,14 +58,35 @@ export function Hero() {
   }
 
   const handleSeek = (e) => {
+    e.stopPropagation()
     if (!videoRef.current || !videoRef.current.duration) return
     const bar = e.currentTarget
     const rect = bar.getBoundingClientRect()
     const x = e.clientX - rect.left
     const percent = x / rect.width
     videoRef.current.currentTime = percent * videoRef.current.duration
-    setProgress(percent * 100)
   }
+
+  const showControlsTemporarily = () => {
+    setShowControls(true)
+    clearTimeout(controlsTimer.current)
+    controlsTimer.current = setTimeout(() => {
+      setShowControls(false)
+    }, 2000)
+  }
+
+  // Autoplay on mount
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.muted = false
+    video.play().catch(() => {
+      // If autoplay blocked — play muted
+      video.muted = true
+      setMuted(true)
+      video.play().catch(() => {})
+    })
+  }, [])
 
   return (
     <section 
@@ -93,21 +108,25 @@ export function Hero() {
           <span className={styles.headlineAccent}>Trade With Precision.</span>
         </h1>
 
-        <div className={styles.videoCard}>
+        <div
+          className={styles.videoCard}
+          onMouseMove={showControlsTemporarily}
+          onMouseLeave={() => setShowControls(false)}
+          onTouchStart={showControlsTemporarily}
+          onClick={handleVideoClick}
+        >
           <video
             ref={videoRef}
             className={styles.heroVideo}
             src={heroData.videoUrl}
             loop
             playsInline
-            controlsList="nodownload"
-            onContextMenu={e => e.preventDefault()}
             onTimeUpdate={handleProgress}
+            onContextMenu={e => e.preventDefault()}
           />
 
-          {/* Custom Controls */}
-          <div className={styles.videoControls}>
-            {/* Progress bar */}
+          {/* Controls — only on hover/touch */}
+          <div className={`${styles.videoControls} ${showControls ? styles.controlsVisible : ''}`}>
             <div
               className={styles.progressBar}
               onClick={handleSeek}
@@ -117,12 +136,10 @@ export function Hero() {
                 style={{ width: `${progress}%` }}
               />
             </div>
-
-            {/* Buttons */}
             <div className={styles.controlButtons}>
               <button
                 className={styles.controlBtn}
-                onClick={togglePlay}
+                onClick={handleVideoClick}
                 aria-label={playing ? 'Pause' : 'Play'}
               >
                 {playing
@@ -130,7 +147,6 @@ export function Hero() {
                   : <Play size={16} fill="currentColor" />
                 }
               </button>
-
               <button
                 className={styles.controlBtn}
                 onClick={toggleMute}
