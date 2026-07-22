@@ -27,20 +27,28 @@ export function Hero() {
   const [ref, inView] = useInView(0.05);
 
   const videoRef = useRef(null)
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
   const [progress, setProgress] = useState(0)
   const [showControls, setShowControls] = useState(false)
+  const [showCenterPlay, setShowCenterPlay] = useState(
+    window.innerWidth <= 768
+  )
   const controlsTimer = useRef(null)
 
-  const handleVideoClick = () => {
+  const togglePlay = (e) => {
+    if (e) e.stopPropagation()
     if (!videoRef.current) return
     if (videoRef.current.paused) {
+      videoRef.current.muted = false
+      setMuted(false)
       videoRef.current.play()
       setPlaying(true)
+      setShowCenterPlay(false)
     } else {
       videoRef.current.pause()
       setPlaying(false)
+      setShowCenterPlay(true)
     }
   }
 
@@ -81,33 +89,23 @@ export function Hero() {
 
     const isMobile = window.innerWidth <= 768
 
-    if (isMobile) {
-      // Mobile — muted autoplay (browser allows this)
-      video.muted = true
-      setMuted(true)
-      video.play().then(() => {
-        setPlaying(true)
-      }).catch(() => {})
-    } else {
-      // Desktop — unmuted autoplay
+    if (!isMobile) {
+      // Desktop only — unmuted autoplay
       video.muted = false
       setMuted(false)
       video.play().then(() => {
         setPlaying(true)
-        video.muted = false
-        setMuted(false)
+        setShowCenterPlay(false)
       }).catch(() => {
-        // Blocked — try muted
         video.muted = true
+        setMuted(true)
         video.play().then(() => {
           setPlaying(true)
-          setTimeout(() => {
-            video.muted = false
-            setMuted(false)
-          }, 100)
+          setShowCenterPlay(false)
         }).catch(() => {})
       })
     }
+    // Mobile — nothing, wait for user tap
   }, [])
 
   // On page visibility change (reload fix)
@@ -118,8 +116,8 @@ export function Hero() {
         if (!isMobile) {
           videoRef.current.muted = false
           setMuted(false)
+          videoRef.current.play().catch(() => {})
         }
-        videoRef.current.play().catch(() => {})
       }
     }
     document.addEventListener('visibilitychange', handleVisibility)
@@ -151,7 +149,7 @@ export function Hero() {
           onMouseMove={showControlsTemporarily}
           onMouseLeave={() => setShowControls(false)}
           onTouchStart={showControlsTemporarily}
-          onClick={handleVideoClick}
+          onClick={togglePlay}
         >
           <video
             ref={videoRef}
@@ -162,6 +160,17 @@ export function Hero() {
             onTimeUpdate={handleProgress}
             onContextMenu={e => e.preventDefault()}
           />
+
+          {/* Center play button for mobile / paused state */}
+          {showCenterPlay && (
+            <button
+              className={styles.centerPlayBtn}
+              onClick={togglePlay}
+              aria-label="Play video"
+            >
+              <Play size={36} fill="white" color="white" />
+            </button>
+          )}
 
           {/* Controls — only on hover/touch */}
           <div className={`${styles.videoControls} ${showControls ? styles.controlsVisible : ''}`}>
@@ -177,7 +186,7 @@ export function Hero() {
             <div className={styles.controlButtons}>
               <button
                 className={styles.controlBtn}
-                onClick={handleVideoClick}
+                onClick={togglePlay}
                 aria-label={playing ? 'Pause' : 'Play'}
               >
                 {playing
