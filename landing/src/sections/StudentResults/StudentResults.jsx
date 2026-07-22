@@ -8,7 +8,7 @@ export function StudentResults() {
   const [showAll, setShowAll] = useState(false);
 
   const allResults = studentResultsData.results;
-  const visibleResults = showAll ? allResults : allResults.slice(0, 3);
+  const visibleResults = allResults;
 
   return (
     <section 

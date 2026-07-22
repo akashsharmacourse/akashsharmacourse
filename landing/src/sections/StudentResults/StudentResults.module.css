@@ -131,10 +131,10 @@
   margin-bottom: clamp(40px, 8vw, 64px);
 }
 
-/* Grid — 3 cols desktop, 3 cols tablet, 1 col mobile */
+/* Grid — 4 cols desktop, 2 cols tablet, 1 col mobile */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   width: 100%;
 }
@@ -147,7 +147,6 @@
   overflow: hidden;
   border: 1px solid var(--glass-border);
   background: var(--bg-card);
-  aspect-ratio: 9/16;
   box-shadow: var(--shadow-card);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -169,32 +168,14 @@
 
 .image {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  height: auto;
+  object-fit: contain;
   display: block;
 }
 
-/* View More button — only visible on mobile */
+/* View More button — hidden */
 .viewMoreBtn {
   display: none;
-  margin: 24px auto 0;
-  padding: 12px 32px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.viewMoreBtn:hover {
-  background: var(--accent-dim);
 }
 
 .note {
@@ -206,12 +187,17 @@
   margin-top: 24px;
 }
 
+/* Mobile — 1 column */
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: repeat(1, 1fr);
   }
-  .viewMoreBtn {
-    display: block;
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
