@@ -27,7 +27,7 @@ export function PnlProof() {
         {/* ONE Single Centered Real Proof Image */}
         <div className={styles.proofImageWrap} style={{ '--i': 2 }}>
           <img
-            src={pnlProofData.proof.image.includes('/upload/') && !pnlProofData.proof.image.includes('/upload/q_auto') ? pnlProofData.proof.image.replace('/upload/', '/upload/q_auto,f_auto,w_800/') : pnlProofData.proof.image}
+            src={pnlProofData.proof.image}
             alt={pnlProofData.proof.imageAlt}
             className={styles.proofImage}
             loading="lazy"

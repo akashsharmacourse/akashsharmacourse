@@ -35,7 +35,7 @@ export function StudentResults() {
                 <div className={styles.placeholder} />
               ) : (
                 <img
-                  src={result.image.includes('/upload/') && !result.image.includes('/upload/q_auto') ? result.image.replace('/upload/', '/upload/q_auto,f_auto,w_400/') : result.image}
+                  src={result.image}
                   alt="Student Result"
                   className={styles.image}
                   loading="lazy"
