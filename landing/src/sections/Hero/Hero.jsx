@@ -75,17 +75,53 @@ export function Hero() {
     }, 2000)
   }
 
-  // Autoplay on mount
+  // Always start unmuted
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+
+    // Always start unmuted
     video.muted = false
-    video.play().catch(() => {
-      // If autoplay blocked — play muted
-      video.muted = true
-      setMuted(true)
-      video.play().catch(() => {})
-    })
+    setMuted(false)
+
+    const playVideo = async () => {
+      try {
+        await video.play()
+        setPlaying(true)
+        // Force unmute after play
+        video.muted = false
+        setMuted(false)
+      } catch {
+        // Browser blocked — play muted first then unmute
+        video.muted = true
+        try {
+          await video.play()
+          setPlaying(true)
+          // Immediately try to unmute
+          setTimeout(() => {
+            video.muted = false
+            setMuted(false)
+          }, 100)
+        } catch {
+          console.log('Autoplay blocked')
+        }
+      }
+    }
+
+    playVideo()
+  }, [])
+
+  // On page visibility change (reload fix)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (!document.hidden && videoRef.current) {
+        videoRef.current.muted = false
+        setMuted(false)
+        videoRef.current.play().catch(() => {})
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [])
 
   return (

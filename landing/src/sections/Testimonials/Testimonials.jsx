@@ -26,13 +26,6 @@ export default function Testimonials() {
   useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (!video) return
-
-      // Load video src only when needed
-      if (i === active && !video.src) {
-        video.src = testimonialsData.testimonials[i].videoUrl
-        video.load()
-      }
-
       if (i === active) {
         if (isMobile()) {
           // Mobile — autoplay muted
@@ -40,12 +33,6 @@ export default function Testimonials() {
           video.play().catch(() => {})
           const newPlaying = [...playingStates]
           newPlaying[i] = true
-          setPlayingStates(newPlaying)
-        } else {
-          // Desktop — pause, wait for user
-          video.pause()
-          const newPlaying = [...playingStates]
-          newPlaying[i] = false
           setPlayingStates(newPlaying)
         }
       } else {
@@ -141,12 +128,12 @@ export default function Testimonials() {
                     <>
                       <video
                         ref={el => videoRefs.current[i] = el}
-                        src={i === active ? t.videoUrl : undefined}
+                        src={t.videoUrl}
                         className={styles.video}
                         muted={mutedStates[i]}
                         loop
                         playsInline
-                        preload={i === active ? "auto" : "none"}
+                        preload="auto"
                         onTimeUpdate={() => handleTimeUpdate(i)}
                         onContextMenu={e => e.preventDefault()}
                       />
