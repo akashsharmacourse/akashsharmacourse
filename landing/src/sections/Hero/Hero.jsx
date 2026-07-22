@@ -38,15 +38,18 @@ export function Hero() {
 
   const togglePlay = (e) => {
     if (e) e.stopPropagation()
-    if (!videoRef.current) return
-    if (videoRef.current.paused) {
-      videoRef.current.muted = false
+    const video = videoRef.current
+    if (!video) return
+
+    if (video.paused) {
+      video.muted = false
       setMuted(false)
-      videoRef.current.play()
+      // Instant play — already loaded
+      video.play()
       setPlaying(true)
       setShowCenterPlay(false)
     } else {
-      videoRef.current.pause()
+      video.pause()
       setPlaying(false)
       setShowCenterPlay(true)
     }
@@ -89,8 +92,15 @@ export function Hero() {
 
     const isMobile = window.innerWidth <= 768
 
-    if (!isMobile) {
-      // Desktop only — unmuted autoplay
+    if (isMobile) {
+      // Silently load video in background
+      video.load()
+      video.muted = true
+      // Pause immediately — just preload
+      video.addEventListener('canplay', () => {
+        video.pause()
+      }, { once: true })
+    } else {
       video.muted = false
       setMuted(false)
       video.play().then(() => {
@@ -105,7 +115,6 @@ export function Hero() {
         }).catch(() => {})
       })
     }
-    // Mobile — nothing, wait for user tap
   }, [])
 
   // On page visibility change (reload fix)
@@ -157,6 +166,7 @@ export function Hero() {
             src={heroData.videoUrl}
             loop
             playsInline
+            preload="auto"
             onTimeUpdate={handleProgress}
             onContextMenu={e => e.preventDefault()}
           />
