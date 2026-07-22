@@ -1,6 +1,6 @@
 import React from 'react';
 import { footerData } from '../../data/data.js';
-import { FaInstagram, FaFacebook, FaLinkedin, FaWhatsapp } from 'react-icons/fa';
+import { FaInstagram, FaFacebook, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 import { MdOutlineEmail } from 'react-icons/md';
 import styles from './Footer.module.css';
 
@@ -10,7 +10,7 @@ export function Footer() {
     Mail: <MdOutlineEmail size={18} />,
     Instagram: <FaInstagram size={18} />,
     Facebook: <FaFacebook size={18} />,
-    LinkedIn: <FaLinkedin size={18} />,
+    YouTube: <FaYoutube size={18} />,
   };
 
   return (
