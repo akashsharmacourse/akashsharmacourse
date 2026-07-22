@@ -4,7 +4,8 @@ import { useInView } from '../../hooks/useInView';
 import {
   Target, LineChart, ShieldCheck,
   MessageCircle, Clock, RefreshCw,
-  CheckCircle, ChevronDown
+  CheckCircle, ChevronDown,
+  TrendingUp, Calendar, Users
 } from 'lucide-react';
 import Testimonials from '../../sections/Testimonials/Testimonials';
 import styles from './OneOnOne.module.css';
@@ -17,6 +18,9 @@ const iconMap = {
   MessageCircle,
   Clock,
   RefreshCw,
+  TrendingUp,
+  Calendar,
+  Users,
 };
 
 // ── FAQ Item ──────────────────────────────────────────
