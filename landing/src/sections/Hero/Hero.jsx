@@ -85,7 +85,6 @@ export function Hero() {
             className={styles.heroVideo}
             src={heroData.videoUrl}
             autoPlay
-            // muted
             loop
             playsInline
             controlsList="nodownload"
@@ -111,7 +110,7 @@ export function Hero() {
               <button
                 className={styles.controlBtn}
                 onClick={togglePlay}
-                aria-label={playing ? 'Pause' : 'Play'}
+                aria-label={playing ? 'Play' : 'Pause'}
               >
                 {playing
                   ? <Pause size={16} fill="currentColor" />
