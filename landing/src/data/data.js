@@ -450,7 +450,7 @@ export const courseSuccessData = {
       desc: "Login to your dashboard and begin your first lesson today.",
     },
   ],
-  whatsappLink: "https://wa.me/919650213917",
+  whatsappLink: "https://chat.whatsapp.com/C8DfTiplfiR6Z16hBeNzLQ?s=sh&p=i&ilr=0",
   whatsappCta: "Join WhatsApp Group",
   loginCta: "Login to Dashboard",
   loginLink: "https://app.askakashsharma.in/login",
