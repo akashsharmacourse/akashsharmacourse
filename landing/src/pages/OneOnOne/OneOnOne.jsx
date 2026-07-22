@@ -169,16 +169,12 @@ export default function OneOnOne() {
           <div className={styles.callGrid}>
             {callProof.images.map((img) => (
               <div key={img.id} className={styles.callCard}>
-                {img.placeholder ? (
-                  <div className={styles.callPlaceholder} />
-                ) : (
-                  <img
-                    src={img.image}
-                    alt="Student Result"
-                    className={styles.callImage}
-                    loading="lazy"
-                  />
-                )}
+                <img
+                  src={img.image}
+                  alt="Student Result"
+                  className={styles.callImage}
+                  loading="lazy"
+                />
               </div>
             ))}
           </div>
