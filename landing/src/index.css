@@ -254,3 +254,12 @@ a.btn,
   }
 }
 
+/* Prevent footer flash on route change */
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+
+

@@ -38,14 +38,24 @@
   margin: 0;
 }
 
-/* 4 columns desktop — no carousel */
-.grid {
+/* ── Desktop 4 grid ── */
+.desktopGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   width: 100%;
 }
 
+/* ── Mobile carousel — hidden on desktop ── */
+.mobileCarousel {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+/* ── Card ── */
 .card {
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -68,7 +78,7 @@
   display: block;
 }
 
-/* Center play button */
+/* Center play */
 .centerPlay {
   position: absolute;
   top: 50%;
@@ -89,7 +99,7 @@
 }
 .centerPlay:hover { background: rgba(0,0,0,0.75); }
 
-/* Bottom controls */
+/* Controls */
 .controls {
   position: absolute;
   bottom: 0;
@@ -133,11 +143,51 @@
 }
 .controlBtn:hover { background: rgba(255,255,255,0.3); }
 
-/* Mobile — 2 columns */
+/* Mobile carousel track */
+.mobileTrack {
+  display: flex;
+  gap: 12px;
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  will-change: transform;
+}
+
+.mobileSlide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+/* Dots */
+.dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.3s ease, width 0.3s ease;
+}
+.dotActive {
+  background: var(--accent);
+  width: 24px;
+  border-radius: 999px;
+}
+
+/* ── Mobile breakpoint ── */
 @media (max-width: 768px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+  .desktopGrid {
+    display: none;
   }
-  .heading { font-size: var(--text-3xl); }
+  .mobileCarousel {
+    display: flex;
+  }
+  .heading {
+    font-size: var(--text-3xl);
+  }
 }

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { PaymentProvider, usePayment } from './context/PaymentContext';
 import Navbar from './components/Navbar/Navbar';
@@ -67,6 +67,28 @@ function HomePage() {
   );
 }
 
+function PageWrapper({ children }) {
+  const location = useLocation()
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    // Hide briefly on route change — then show
+    setVisible(false)
+    const timer = setTimeout(() => setVisible(true), 10)
+    return () => clearTimeout(timer)
+  }, [location.pathname])
+
+  return (
+    <div style={{
+      opacity: visible ? 1 : 0,
+      transition: 'opacity 0.15s ease',
+      minHeight: '100svh',
+    }}>
+      {children}
+    </div>
+  )
+}
+
 function Layout() {
   const location = useLocation();
   
@@ -86,33 +108,35 @@ function Layout() {
     <>
       <ScrollToTop />
       {!shouldHide && <Navbar />}
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/1to1" element={
-          <Suspense fallback={<div className="sectionLoading"></div>}>
-            <OneOnOne />
-          </Suspense>
-        } />
-        <Route path="/1on1" element={<Navigate to="/1to1" replace />} />
-        <Route path="/enroll" element={<EnrollFormPage type="course" />} />
-        <Route path="/enroll/1to1" element={<EnrollFormPage type="1on1" />} />
-        <Route path="/enroll/1on1" element={<EnrollFormPage type="1on1" />} />
-        <Route path="/success/course" element={
-          <SuccessRoute>
-            <CourseSuccess />
-          </SuccessRoute>
-        } />
-        <Route path="/success/1on1" element={
-          <SuccessRoute>
-            <OneOnOneSuccess />
-          </SuccessRoute>
-        } />
-        <Route path="/success/1to1" element={
-          <SuccessRoute>
-            <OneOnOneSuccess />
-          </SuccessRoute>
-        } />
-      </Routes>
+      <PageWrapper>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/1to1" element={
+            <Suspense fallback={<div className="sectionLoading"></div>}>
+              <OneOnOne />
+            </Suspense>
+          } />
+          <Route path="/1on1" element={<Navigate to="/1to1" replace />} />
+          <Route path="/enroll" element={<EnrollFormPage type="course" />} />
+          <Route path="/enroll/1to1" element={<EnrollFormPage type="1on1" />} />
+          <Route path="/enroll/1on1" element={<EnrollFormPage type="1on1" />} />
+          <Route path="/success/course" element={
+            <SuccessRoute>
+              <CourseSuccess />
+            </SuccessRoute>
+          } />
+          <Route path="/success/1on1" element={
+            <SuccessRoute>
+              <OneOnOneSuccess />
+            </SuccessRoute>
+          } />
+          <Route path="/success/1to1" element={
+            <SuccessRoute>
+              <OneOnOneSuccess />
+            </SuccessRoute>
+          } />
+        </Routes>
+      </PageWrapper>
       {!shouldHide && (
         <Suspense fallback={<div className="sectionLoading"></div>}>
           <Footer />
@@ -143,5 +167,3 @@ export function App() {
 }
 
 export default App;
-
-
