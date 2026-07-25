@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /enroll
+Disallow: /success
+
+Sitemap: https://www.askakashsharma.in/sitemap.xml
