@@ -112,9 +112,8 @@ export default function Testimonials() {
       <div className={styles.videoArea}>
         <video
           ref={el => videoRefs.current[i] = el}
-          src={t.videoUrl}
           className={styles.video}
-          preload="auto"
+          preload="metadata"
           loop
           playsInline
           muted={mutedStates[i]}
@@ -125,7 +124,9 @@ export default function Testimonials() {
             setPlayingStates([...np])
           }}
           onContextMenu={e => e.preventDefault()}
-        />
+        >
+          <source src={t.videoUrl} type="video/mp4" />
+        </video>
         {!playingStates[i] && (
           <button
             className={styles.centerPlay}

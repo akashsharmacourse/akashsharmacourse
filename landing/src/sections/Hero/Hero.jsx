@@ -93,28 +93,10 @@ export function Hero() {
     const isMobile = window.innerWidth <= 768
 
     if (isMobile) {
-      // Silently load video in background
+      // Mobile — just load, wait for tap
       video.load()
-      video.muted = true
-      // Pause immediately — just preload
-      video.addEventListener('canplay', () => {
-        video.pause()
-      }, { once: true })
-    } else {
-      video.muted = false
-      setMuted(false)
-      video.play().then(() => {
-        setPlaying(true)
-        setShowCenterPlay(false)
-      }).catch(() => {
-        video.muted = true
-        setMuted(true)
-        video.play().then(() => {
-          setPlaying(true)
-          setShowCenterPlay(false)
-        }).catch(() => {})
-      })
     }
+    // Desktop — onCanPlay handles it
   }, [])
 
   // On page visibility change (reload fix)
@@ -163,13 +145,34 @@ export function Hero() {
           <video
             ref={videoRef}
             className={styles.heroVideo}
-            src={heroData.videoUrl}
             loop
             playsInline
             preload="auto"
             onTimeUpdate={handleProgress}
             onContextMenu={e => e.preventDefault()}
-          />
+            onCanPlay={() => {
+              // Play as soon as enough data loaded
+              const video = videoRef.current
+              if (!video || playing) return
+              const isMobile = window.innerWidth <= 768
+              if (!isMobile) {
+                video.muted = false
+                video.play().then(() => {
+                  setPlaying(true)
+                  setMuted(false)
+                }).catch(() => {
+                  video.muted = true
+                  setMuted(true)
+                  video.play().then(() => setPlaying(true)).catch(() => {})
+                })
+              }
+            }}
+          >
+            <source
+              src={heroData.videoUrl}
+              type="video/mp4"
+            />
+          </video>
 
           {/* Center play button for mobile / paused state */}
           {showCenterPlay && (
