@@ -10,13 +10,19 @@ const VideoCard = memo(({ t, i, isPlaying, isMuted, videoProgress, onPlay, onMut
     <div className={styles.card}>
       <div className={styles.videoArea}>
         <video
-          ref={videoRef}
+          ref={(el) => {
+            if (el) {
+              // Safari fix — set muted directly on DOM
+              el.muted = true
+              el.defaultMuted = true
+              videoRef(el)
+            }
+          }}
           src={t.videoUrl}
           className={styles.video}
           preload="auto"
           loop
           playsInline
-          muted
           onTimeUpdate={onProgress}
           onEnded={onEnded}
           onContextMenu={e => e.preventDefault()}
@@ -86,17 +92,21 @@ export default function Testimonials() {
 
     pauseAll(i)
 
+    // Safari fix — set muted false directly on DOM
     video.muted = false
+    video.defaultMuted = false
     setMutedMap(prev => ({ ...prev, [i]: false }))
 
     video.play()
       .then(() => setActivePlay(i))
       .catch(() => {
+        // Fallback muted
         video.muted = true
+        video.defaultMuted = true
         setMutedMap(prev => ({ ...prev, [i]: true }))
         video.play()
           .then(() => setActivePlay(i))
-          .catch(err => console.error('Play error:', err))
+          .catch(err => console.error('Play failed:', err))
       })
   }, [pauseAll])
 
