@@ -168,7 +168,7 @@ router.post('/verify', async (req, res) => {
       try {
         const sheetId = process.env.GOOGLE_SHEET_ID_ONEONONE
         await appendToSheet(sheetId, '1on1Enrollments', [
-          timestamp, name, email, phone, '₹24,999', 'paid'
+          timestamp, name, email, phone, '₹29,999', 'paid'
         ])
       } catch (sheetErr) {
         console.error('1on1 Sheet error:', sheetErr.message)
