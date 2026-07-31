@@ -1,20 +1,18 @@
 import { useState, useRef, useCallback, memo } from 'react'
 import { testimonialsData } from '../../data/data.js'
 import { useInView } from '../../hooks/useInView'
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react'
+import { Play, Pause } from 'lucide-react'
 import styles from './Testimonials.module.css'
 
 // ── VideoCard OUTSIDE — never remounts ──────────────
-const VideoCard = memo(({ t, i, isPlaying, isMuted, videoProgress, onPlay, onMute, onSeek, onProgress, onEnded, videoRef }) => {
+const VideoCard = memo(({ t, i, isPlaying, videoProgress, onPlay, onSeek, onProgress, onEnded, videoRef }) => {
   return (
     <div className={styles.card}>
       <div className={styles.videoArea}>
         <video
           ref={(el) => {
             if (el) {
-              // Safari fix — set muted directly on DOM
-              el.muted = true
-              el.defaultMuted = true
+              el.muted = false
               videoRef(el)
             }
           }}
@@ -28,29 +26,18 @@ const VideoCard = memo(({ t, i, isPlaying, isMuted, videoProgress, onPlay, onMut
           onContextMenu={e => e.preventDefault()}
         />
 
-        {!isPlaying && (
-          <button className={styles.centerPlay} onClick={onPlay} aria-label="Play">
-            <Play size={28} fill="white" color="white" />
-          </button>
-        )}
+        {/* Center play/pause button only */}
+        <button className={styles.centerPlay} onClick={onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
+          {isPlaying
+            ? <Pause size={28} fill="white" color="white" />
+            : <Play size={28} fill="white" color="white" />
+          }
+        </button>
 
+        {/* Progress bar only */}
         <div className={styles.controls}>
           <div className={styles.progressBar} onClick={onSeek}>
             <div className={styles.progressFill} style={{ width: `${videoProgress}%` }} />
-          </div>
-          <div className={styles.controlRow}>
-            <button className={styles.controlBtn} onClick={onPlay}>
-              {isPlaying
-                ? <Pause size={13} fill="white" color="white" />
-                : <Play size={13} fill="white" color="white" />
-              }
-            </button>
-            <button className={styles.controlBtn} onClick={onMute}>
-              {isMuted
-                ? <VolumeX size={13} color="white" />
-                : <Volume2 size={13} color="white" />
-              }
-            </button>
           </div>
         </div>
       </div>
@@ -64,7 +51,6 @@ VideoCard.displayName = 'VideoCard'
 export default function Testimonials() {
   const [sectionRef, inView] = useInView()
   const [activePlay, setActivePlay] = useState(-1)
-  const [mutedMap, setMutedMap] = useState({})
   const [progressMap, setProgressMap] = useState({})
   const [activeSlide, setActiveSlide] = useState(0)
   const videoRefs = useRef({})
@@ -92,31 +78,11 @@ export default function Testimonials() {
 
     pauseAll(i)
 
-    // Safari fix — set muted false directly on DOM
     video.muted = false
-    video.defaultMuted = false
-    setMutedMap(prev => ({ ...prev, [i]: false }))
-
     video.play()
       .then(() => setActivePlay(i))
-      .catch(() => {
-        // Fallback muted
-        video.muted = true
-        video.defaultMuted = true
-        setMutedMap(prev => ({ ...prev, [i]: true }))
-        video.play()
-          .then(() => setActivePlay(i))
-          .catch(err => console.error('Play failed:', err))
-      })
+      .catch(err => console.error('Play failed:', err))
   }, [pauseAll])
-
-  const handleMute = useCallback((i) => {
-    const video = videoRefs.current[i]
-    if (!video) return
-    const newMuted = !video.muted
-    video.muted = newMuted
-    setMutedMap(prev => ({ ...prev, [i]: newMuted }))
-  }, [])
 
   const handleProgress = useCallback((i) => {
     const video = videoRefs.current[i]
@@ -180,11 +146,9 @@ export default function Testimonials() {
               t={t}
               i={i}
               isPlaying={activePlay === i}
-              isMuted={mutedMap[i] ?? true}
               videoProgress={progressMap[i] ?? 0}
               videoRef={setVideoRef(i)}
               onPlay={() => handlePlay(i)}
-              onMute={() => handleMute(i)}
               onSeek={(e) => handleSeek(e, i)}
               onProgress={() => handleProgress(i)}
               onEnded={() => handleEnded(i)}
@@ -206,11 +170,9 @@ export default function Testimonials() {
                   t={t}
                   i={`m${i}`}
                   isPlaying={activePlay === `m${i}`}
-                  isMuted={mutedMap[`m${i}`] ?? true}
                   videoProgress={progressMap[`m${i}`] ?? 0}
                   videoRef={setVideoRef(`m${i}`)}
                   onPlay={() => handlePlay(`m${i}`)}
-                  onMute={() => handleMute(`m${i}`)}
                   onSeek={(e) => handleSeek(e, `m${i}`)}
                   onProgress={() => handleProgress(`m${i}`)}
                   onEnded={() => handleEnded(`m${i}`)}

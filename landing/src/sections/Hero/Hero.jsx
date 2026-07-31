@@ -1,11 +1,8 @@
-// 
-
-
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { heroData } from '../../data/data.js';
 import { useInView } from '../../hooks/useInView';
 import { useCountUp } from '../../hooks/useCountUp';
-import { Play, Pause, Volume2, VolumeX, TrendingUp as BadgeIcon } from 'lucide-react';
+import { Play, TrendingUp as BadgeIcon } from 'lucide-react';
 import styles from './Hero.module.css';
 
 function StatItem({ stat, inView, index }) {
@@ -28,13 +25,7 @@ export function Hero() {
 
   const videoRef = useRef(null)
   const [playing, setPlaying] = useState(false)
-  const [muted, setMuted] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [showControls, setShowControls] = useState(false)
-  const [showCenterPlay, setShowCenterPlay] = useState(
-    window.innerWidth <= 768
-  )
-  const controlsTimer = useRef(null)
 
   const togglePlay = (e) => {
     if (e) e.stopPropagation()
@@ -43,23 +34,12 @@ export function Hero() {
 
     if (video.paused) {
       video.muted = false
-      setMuted(false)
-      // Instant play — already loaded
       video.play()
       setPlaying(true)
-      setShowCenterPlay(false)
     } else {
       video.pause()
       setPlaying(false)
-      setShowCenterPlay(true)
     }
-  }
-
-  const toggleMute = (e) => {
-    e.stopPropagation()
-    if (!videoRef.current) return
-    videoRef.current.muted = !muted
-    setMuted(!muted)
   }
 
   const handleProgress = () => {
@@ -77,51 +57,6 @@ export function Hero() {
     const percent = x / rect.width
     videoRef.current.currentTime = percent * videoRef.current.duration
   }
-
-  const showControlsTemporarily = () => {
-    setShowControls(true)
-    clearTimeout(controlsTimer.current)
-    controlsTimer.current = setTimeout(() => {
-      setShowControls(false)
-    }, 2000)
-  }
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-    const isMobile = window.innerWidth <= 768
-    if (isMobile) {
-      video.load()
-      return
-    }
-    // Desktop
-    video.muted = true
-    video.defaultMuted = true
-    video.play()
-      .then(() => {
-        setPlaying(true)
-        // Unmute after play
-        video.muted = false
-        setMuted(false)
-      })
-      .catch(() => console.log('Autoplay blocked'))
-  }, [])
-
-  // On page visibility change (reload fix)
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (!document.hidden && videoRef.current) {
-        const isMobile = window.innerWidth <= 768
-        if (!isMobile) {
-          videoRef.current.muted = false
-          setMuted(false)
-          videoRef.current.play().catch(() => {})
-        }
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
-  }, [])
 
   return (
     <section 
@@ -145,17 +80,13 @@ export function Hero() {
 
         <div
           className={styles.videoCard}
-          onMouseMove={showControlsTemporarily}
-          onMouseLeave={() => setShowControls(false)}
-          onTouchStart={showControlsTemporarily}
           onClick={togglePlay}
         >
           <video
             ref={(el) => {
               if (el) {
                 videoRef.current = el
-                el.muted = true
-                el.defaultMuted = true
+                el.muted = false
               }
             }}
             className={styles.heroVideo}
@@ -167,19 +98,19 @@ export function Hero() {
             onContextMenu={e => e.preventDefault()}
           />
 
-          {/* Center play button for mobile / paused state */}
-          {showCenterPlay && (
+          {/* Center play button */}
+          {!playing && (
             <button
               className={styles.centerPlayBtn}
               onClick={togglePlay}
-              aria-label="Play video"
+              aria-label="Play"
             >
-              <Play size={36} fill="white" color="white" />
+              <Play size={48} fill="white" color="white" />
             </button>
           )}
 
-          {/* Controls — only on hover/touch */}
-          <div className={`${styles.videoControls} ${showControls ? styles.controlsVisible : ''}`}>
+          {/* Progress bar only */}
+          <div className={styles.videoControls}>
             <div
               className={styles.progressBar}
               onClick={handleSeek}
@@ -188,28 +119,6 @@ export function Hero() {
                 className={styles.progressFill}
                 style={{ width: `${progress}%` }}
               />
-            </div>
-            <div className={styles.controlButtons}>
-              <button
-                className={styles.controlBtn}
-                onClick={togglePlay}
-                aria-label={playing ? 'Pause' : 'Play'}
-              >
-                {playing
-                  ? <Pause size={16} fill="currentColor" />
-                  : <Play size={16} fill="currentColor" />
-                }
-              </button>
-              <button
-                className={styles.controlBtn}
-                onClick={toggleMute}
-                aria-label={muted ? 'Unmute' : 'Mute'}
-              >
-                {muted
-                  ? <VolumeX size={16} />
-                  : <Volume2 size={16} />
-                }
-              </button>
             </div>
           </div>
         </div>
