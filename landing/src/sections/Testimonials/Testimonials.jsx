@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, memo } from 'react'
 import { testimonialsData } from '../../data/data.js'
 import { useInView } from '../../hooks/useInView'
-import { Play, Pause } from 'lucide-react'
+import { Play } from 'lucide-react'
 import styles from './Testimonials.module.css'
 
 // ── VideoCard OUTSIDE — never remounts ──────────────
@@ -27,11 +27,11 @@ const VideoCard = memo(({ t, i, isPlaying, videoProgress, onPlay, onSeek, onProg
         />
 
         {/* Center play/pause button only */}
-        <button className={styles.centerPlay} onClick={onPlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
-          {isPlaying
-            ? <Pause size={28} fill="white" color="white" />
-            : <Play size={28} fill="white" color="white" />
-          }
+        <button
+          className={`${styles.centerPlay} ${isPlaying ? styles.centerPlayHidden : ''}`}
+          onClick={onPlay}
+        >
+          <Play size={28} fill="white" color="white" />
         </button>
 
         {/* Progress bar only */}

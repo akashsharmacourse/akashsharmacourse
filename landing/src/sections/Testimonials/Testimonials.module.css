@@ -95,9 +95,15 @@
   cursor: pointer;
   backdrop-filter: blur(4px);
   z-index: 10;
-  transition: background 0.2s ease;
+  transition: opacity 0.2s ease, background 0.2s ease;
 }
 .centerPlay:hover { background: rgba(0,0,0,0.75); }
+
+/* Hide when playing — add this */
+.centerPlayHidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
 /* Controls */
 .controls {
