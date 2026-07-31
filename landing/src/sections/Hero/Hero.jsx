@@ -89,43 +89,22 @@ export function Hero() {
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
     const isMobile = window.innerWidth <= 768
-
     if (isMobile) {
       video.load()
       return
     }
-
-    // Desktop — simple play
-    const tryPlay = async () => {
-      try {
+    // Desktop
+    video.muted = true
+    video.defaultMuted = true
+    video.play()
+      .then(() => {
+        setPlaying(true)
+        // Unmute after play
         video.muted = false
         setMuted(false)
-        await video.play()
-        setPlaying(true)
-      } catch {
-        try {
-          video.muted = true
-          setMuted(true)
-          await video.play()
-          setPlaying(true)
-        } catch {
-          console.log('Autoplay blocked')
-        }
-      }
-    }
-
-    // Wait for video to be ready
-    if (video.readyState >= 3) {
-      tryPlay()
-    } else {
-      video.addEventListener('canplaythrough', tryPlay, { once: true })
-    }
-
-    return () => {
-      video.removeEventListener('canplaythrough', tryPlay)
-    }
+      })
+      .catch(() => console.log('Autoplay blocked'))
   }, [])
 
   // On page visibility change (reload fix)
@@ -172,7 +151,13 @@ export function Hero() {
           onClick={togglePlay}
         >
           <video
-            ref={videoRef}
+            ref={(el) => {
+              if (el) {
+                videoRef.current = el
+                el.muted = true
+                el.defaultMuted = true
+              }
+            }}
             className={styles.heroVideo}
             src={heroData.videoUrl}
             loop
