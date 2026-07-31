@@ -28,11 +28,20 @@ const VideoCard = memo(({ t, i, isPlaying, videoProgress, onPlay, onSeek, onProg
 
         {/* Center play/pause button only */}
         <button
-          className={`${styles.centerPlay} ${isPlaying ? styles.centerPlayHidden : ''}`}
+          className={styles.centerPlay}
           onClick={onPlay}
+          style={{ opacity: isPlaying ? 0 : 1, pointerEvents: isPlaying ? 'none' : 'all' }}
         >
           <Play size={28} fill="white" color="white" />
         </button>
+
+        {/* Pause overlay — click anywhere on video to pause */}
+        {isPlaying && (
+          <div
+            className={styles.pauseOverlay}
+            onClick={onPlay}
+          />
+        )}
 
         {/* Progress bar only */}
         <div className={styles.controls}>

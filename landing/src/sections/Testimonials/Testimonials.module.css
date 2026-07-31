@@ -105,6 +105,13 @@
   pointer-events: none;
 }
 
+.pauseOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  cursor: pointer;
+}
+
 /* Controls */
 .controls {
   position: absolute;
