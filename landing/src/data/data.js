@@ -24,7 +24,7 @@ export const heroData = {
     { value: 600, suffix: "+", label: "Five-Star Reviews" },
     { value: 10, suffix: "+", label: "Years Experience" },
   ],
-  videoUrl: "https://res.cloudinary.com/df0gvretu/video/upload/v1784528141/Ytt_ad_video_v1_fdsnzb.mp4",
+  videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587205/WhatsApp_Video_2026-08-01_at_17.50.31_n17alw.mp4",
   videoPlaceholder: false,
 };
 
@@ -89,7 +89,7 @@ export const aboutData = {
   name: "Akash Sharma",
   title: "Professional Stock Market Trader & Coach",
   bio: "A results-driven professional with over a decade of hands-on experience in equities, intraday, and swing trading. I teach one proven strategy in plain language — so anyone can trade with clarity and confidence.",
-  image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079548/AkashSharma_pawjik.png",
+  image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587718/IMG_2487_xesbyy.png",
   imageAlt: "Akash Sharma — Stock Market Coach",
   imagePlaceholder: false,
   stats: [
@@ -108,7 +108,7 @@ export const pnlProofData = {
   disclaimer: "Past performance is not indicative of future results. Trading involves risk.",
   proof: {
     id: 1,
-    image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079525/pnl_pwgfan.png",
+    image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587345/Screenshot_2026-08-01_175844_rafsmk.png",
     imageAlt: "Verified PnL Screenshot — Akash Sharma",
     placeholder: false,
   },
@@ -122,10 +122,10 @@ export const studentResultsData = {
   heading: "Students Who Transformed Their Trading",
   subheading: "Real results. Real students. Shared with permission.",
   results: [
-    { id: 1, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2336_owfzmn.jpg", label: "Student Result 1" },
-    { id: 2, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2338_zufbg0.jpg", label: "Student Result 2" },
-    { id: 3, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2339_fpx45j.jpg", label: "Student Result 3" },
-    { id: 4, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707375/IMG_2341_czprin.jpg", label: "Student Result 4" },
+    { id: 1, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587181/IMG_2336_an2kpe.jpg", label: "Student Result 1" },
+    { id: 2, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2338_o4hfam.jpg", label: "Student Result 2" },
+    { id: 3, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2339_puc61m.jpg", label: "Student Result 3" },
+    { id: 4, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587181/IMG_2336_an2kpe.jpg", label: "Student Result 4" },
   ],
   note: "Results vary based on individual effort and market conditions.",
 };
@@ -139,28 +139,28 @@ export const testimonialsData = {
       id: 1,
       name: "Student 1",
       role: "Student",
-      videoUrl: "https://res.cloudinary.com/df0gvretu/video/upload/v1784707276/WhatsApp_Video_2026-07-22_at_12.38.58_vmmchh.mp4",
+      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587246/WhatsApp_Video_2026-07-22_at_12.38.02_xs0rrk.mp4",
       videoPlaceholder: false,
     },
     {
       id: 2,
       name: "Student 2",
       role: "Student",
-      videoUrl: "https://res.cloudinary.com/df0gvretu/video/upload/v1784707260/WhatsApp_Video_2026-07-22_at_12.40.19_1_e4s6nl.mp4",
+      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587233/WhatsApp_Video_2026-07-22_at_12.38.03_ftnryb.mp4",
       videoPlaceholder: false,
     },
     {
       id: 3,
       name: "Student 3",
       role: "Student",
-      videoUrl: "https://res.cloudinary.com/df0gvretu/video/upload/v1784707224/WhatsApp_Video_2026-07-22_at_12.40.19_fotctn.mp4",
+      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587203/WhatsApp_Video_2026-07-22_at_12.38.02_1_o1rknv.mp4",
       videoPlaceholder: false,
     },
     {
       id: 4,
       name: "Student 4",
       role: "Student",
-      videoUrl: "https://res.cloudinary.com/df0gvretu/video/upload/v1784707215/WhatsApp_Video_2026-07-22_at_12.38.16_pp5zx6.mp4",
+      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587195/WhatsApp_Video_2026-07-22_at_12.38.01_bs3wnf.mp4",
       videoPlaceholder: false,
     },
   ],
@@ -285,7 +285,7 @@ export const oneOnOneData = {
     subheadline: "Get exclusive 2-week private access — all classes Live Zoom sessions, One to One discussions, trade setups discussed one day in advance.",
     ctaPrimary: "Get Access Now",
     ctaSecondary: "View Results",
-    image: "https://res.cloudinary.com/df0gvretu/image/upload/v1781079548/AkashSharma_pawjik.png",
+    image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587718/IMG_2487_xesbyy.png",
     imageAlt: "Akash Sharma — Personal Trading Coach",
   },
 
@@ -373,9 +373,9 @@ export const oneOnOneData = {
     heading: "Real Results from Our Students",
     subheading: "Real results. Real students. Shared with permission.",
     images: [
-      { id: 1, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2336_owfzmn.jpg", label: "Student Result 1" },
-      { id: 2, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2338_zufbg0.jpg", label: "Student Result 2" },
-      { id: 3, placeholder: false, image: "https://res.cloudinary.com/df0gvretu/image/upload/v1784707376/IMG_2339_fpx45j.jpg", label: "Student Result 3" },
+      { id: 1, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587181/IMG_2336_an2kpe.jpg", label: "Student Result 1" },
+      { id: 2, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2338_o4hfam.jpg", label: "Student Result 2" },
+      { id: 3, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2339_puc61m.jpg", label: "Student Result 3" },
     ],
   },
 
