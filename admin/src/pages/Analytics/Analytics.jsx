@@ -13,10 +13,24 @@ export default function Analytics() {
     avgCompletionRate: 0,
   })
   const [coursePopularity, setCoursePopularity] = useState([]) // Array of { title, count, percent }
+  const [cloudinaryStats, setCloudinaryStats] = useState(null)
 
   useEffect(() => {
     fetchAnalytics()
+    fetchCloudinaryStats()
   }, [])
+
+  const fetchCloudinaryStats = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/stats/usage`, {
+        headers: { 'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET }
+      })
+      const data = await res.json()
+      if (data.success) setCloudinaryStats(data.cloudinary)
+    } catch (err) {
+      console.error('Stats fetch error:', err)
+    }
+  }
 
   const fetchAnalytics = async () => {
     try {
@@ -176,6 +190,53 @@ export default function Analytics() {
           </div>
         </div>
       </div>
+
+      {/* Cloudinary Usage Section */}
+      {cloudinaryStats && (
+        <div className={styles.section}>
+          <h3 className={styles.sectionTitle}>☁️ Cloudinary Usage</h3>
+          <div className={styles.statsGrid}>
+            {[
+              {
+                label: 'Credits Used',
+                value: `${cloudinaryStats.credits.used} / ${cloudinaryStats.credits.limit}`,
+                percent: cloudinaryStats.credits.percent,
+                warning: cloudinaryStats.credits.percent > 80,
+              },
+              {
+                label: 'Storage',
+                value: `${cloudinaryStats.storage.used} GB / 25 GB`,
+                percent: (cloudinaryStats.storage.used / 25 * 100).toFixed(1),
+                warning: cloudinaryStats.storage.used > 20,
+              },
+              {
+                label: 'Bandwidth',
+                value: `${cloudinaryStats.bandwidth.used} GB / 25 GB`,
+                percent: (cloudinaryStats.bandwidth.used / 25 * 100).toFixed(1),
+                warning: cloudinaryStats.bandwidth.used > 20,
+              },
+              {
+                label: 'Transformations',
+                value: `${cloudinaryStats.transformations.used} / ${cloudinaryStats.transformations.limit}`,
+                percent: (cloudinaryStats.transformations.used / cloudinaryStats.transformations.limit * 100).toFixed(1),
+                warning: cloudinaryStats.transformations.used > 20000,
+              },
+            ].map((stat, i) => (
+              <div key={i} className={`${styles.statCard} ${stat.warning ? styles.warningCard : ''}`}>
+                <div className={styles.statValue}>{stat.value}</div>
+                <div className={styles.statLabel}>{stat.label}</div>
+                <div className={styles.usageBar}>
+                  <div
+                    className={`${styles.usageFill} ${stat.warning ? styles.usageWarning : ''}`}
+                    style={{ width: `${Math.min(stat.percent, 100)}%` }}
+                  />
+                </div>
+                <div className={styles.statPercent}>{stat.percent}% used</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

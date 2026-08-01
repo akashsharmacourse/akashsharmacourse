@@ -101,11 +101,17 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     const curr = videoRef.current.currentTime
     const dur = videoRef.current.duration
     setCurrentTime(curr)
-    if (dur) setProgress((curr / dur) * 100)
+    if (dur) {
+      setProgress((curr / dur) * 100)
+      if (!duration || duration !== dur) setDuration(dur)
+    }
   }
 
   const handleLoadedMetadata = () => {
-    if (videoRef.current) setDuration(videoRef.current.duration)
+    if (videoRef.current) {
+      console.log('Duration:', videoRef.current?.duration)
+      setDuration(videoRef.current.duration)
+    }
   }
 
   const handleSeek = (e) => {
@@ -192,6 +198,7 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
         className={styles.video}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onDurationChange={handleLoadedMetadata}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         onEnded={() => setPlaying(false)}

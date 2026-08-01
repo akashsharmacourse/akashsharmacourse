@@ -8,6 +8,7 @@ import sheetsRoutes from './routes/sheets.js'
 import emailRoutes from './routes/email.js'
 import videoRoutes from './routes/video.js'
 import uploadRoutes from './routes/upload.js'
+import statsRoutes from './routes/stats.js'
 
 dotenv.config()
 
@@ -33,6 +34,7 @@ app.use('/api/sheets', sheetsRoutes)
 app.use('/api/email', emailRoutes)
 app.use('/api/video', videoRoutes)
 app.use('/api/upload', uploadRoutes)
+app.use('/api/stats', statsRoutes)
 
 // ── Health check ──────────────────────────────────────
 app.get('/api/health', (req, res) => {
