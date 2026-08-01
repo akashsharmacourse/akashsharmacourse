@@ -22,6 +22,8 @@ router.get('/usage', async (req, res) => {
 
     // ── Cloudinary ──
     const cloudinaryUsage = await cloudinary.api.usage()
+    console.log('Cloudinary cloud name:', process.env.CLOUDINARY_CLOUD_NAME)
+    console.log('Cloudinary usage raw:', JSON.stringify(cloudinaryUsage))
 
     // ── Firebase ──
     const usersSnap = await db.collection('users').get()
@@ -39,12 +41,13 @@ router.get('/usage', async (req, res) => {
     // ── Resend ──
     let resendStats = null
     try {
-      const emails = await resend.emails.list()
+      const emails = await resend.emails.list({ limit: 100 })
       resendStats = {
-        total: emails?.data?.length || 0,
+        total: emails?.data?.data?.length || emails?.data?.length || 0,
       }
-    } catch {
-      resendStats = { total: 'N/A' }
+    } catch (e) {
+      console.error('Resend error:', e)
+      resendStats = { total: 0 }
     }
 
     res.json({
