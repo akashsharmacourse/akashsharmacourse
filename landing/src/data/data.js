@@ -189,19 +189,19 @@ export const pricingData = {
   paymentMethods: [
     {
       name: "UPI",
-      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_1_ougu7q.png"
+      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_1_d18ghx.png"
     },
     {
       name: "Google Pay",
-      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_kvopvi.jpg"
+      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_f9hbta.jpg"
     },
     {
       name: "PhonePe",
-      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/images_rc79wj.png"
+      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/images_teirl9.png"
     },
     {
       name: "Razorpay",
-      logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_o4vpwz.png"
+      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_yzhhqz.png"
     },
   ],
 };
@@ -350,19 +350,19 @@ export const oneOnOneData = {
     paymentMethods: [
       {
         name: "UPI",
-        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_1_ougu7q.png"
+        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_1_d18ghx.png"
       },
       {
         name: "Google Pay",
-        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_kvopvi.jpg"
+        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_f9hbta.jpg"
       },
       {
         name: "PhonePe",
-        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/images_rc79wj.png"
+        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/images_teirl9.png"
       },
       {
         name: "Razorpay",
-        logo: "https://res.cloudinary.com/df0gvretu/image/upload/v1781081715/download_o4vpwz.png"
+        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_yzhhqz.png"
       },
     ],
   },
