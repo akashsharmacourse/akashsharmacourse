@@ -1,7 +1,6 @@
 import express from 'express'
 import { v2 as cloudinary } from 'cloudinary'
 import { db } from '../config/firebase.js'
-import { Resend } from 'resend'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,7 +10,6 @@ cloudinary.config({
 })
 
 const router = express.Router()
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 router.get('/usage', async (req, res) => {
   try {
@@ -22,8 +20,6 @@ router.get('/usage', async (req, res) => {
 
     // ── Cloudinary ──
     const cloudinaryUsage = await cloudinary.api.usage()
-    console.log('Cloudinary cloud name:', process.env.CLOUDINARY_CLOUD_NAME)
-    console.log('Cloudinary usage raw:', JSON.stringify(cloudinaryUsage))
 
     // ── Firebase ──
     const usersSnap = await db.collection('users').get()
@@ -41,13 +37,14 @@ router.get('/usage', async (req, res) => {
     // ── Resend ──
     let resendStats = null
     try {
-      const emails = await resend.emails.list({ limit: 100 })
+      // Resend free plan mein usage API nahi hai
+      // Show placeholder
       resendStats = {
-        total: emails?.data?.data?.length || emails?.data?.length || 0,
+        total: 'Check resend.com/dashboard',
+        limit: 3000,
       }
-    } catch (e) {
-      console.error('Resend error:', e)
-      resendStats = { total: 0 }
+    } catch {
+      resendStats = { total: 'N/A', limit: 3000 }
     }
 
     res.json({
@@ -57,6 +54,7 @@ router.get('/usage', async (req, res) => {
           used: cloudinaryUsage.credits?.usage || 0,
           limit: cloudinaryUsage.credits?.limit || 25,
           percent: parseFloat(cloudinaryUsage.credits?.used_percent || 0).toFixed(1),
+          lastUpdated: cloudinaryUsage.last_updated || 'N/A',
         },
         storage: {
           used: (cloudinaryUsage.storage?.usage / 1024 / 1024 / 1024).toFixed(3),
