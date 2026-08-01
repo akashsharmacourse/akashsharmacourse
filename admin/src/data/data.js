@@ -1,5 +1,5 @@
 export const sidebarData = {
-  logo: '/logo.png',
+  logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785589653/IMG_2488.JPG_qgh8kt.jpg",
   logoAlt: 'Admin Panel',
   links: [
     { label: 'Dashboard', href: '/', icon: 'LayoutDashboard' },

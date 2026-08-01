@@ -28,7 +28,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
         {/* Logo */}
         <div className={styles.logoWrap}>
           <img
-            src="https://res.cloudinary.com/df0gvretu/image/upload/v1781079526/logo_c0qnsv.png"
+            src="https://res.cloudinary.com/tmgtqqqg/image/upload/v1785589653/IMG_2488.JPG_qgh8kt.jpg"
             alt={sidebarData.logoAlt}
             className={styles.logo}
             onError={(e) => {

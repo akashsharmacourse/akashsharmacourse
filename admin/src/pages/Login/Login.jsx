@@ -34,7 +34,11 @@ export default function Login() {
     <main className={styles.page}>
       <div className={styles.card}>
         <div className={styles.iconWrap}>
-          <ShieldCheck size={32} className={styles.icon} />
+          <img
+            src="https://res.cloudinary.com/tmgtqqqg/image/upload/v1785589653/IMG_2488.JPG_qgh8kt.jpg"
+            alt="AskAkashSharma Logo"
+            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+          />
         </div>
         <h1 className={styles.heading}>Admin Login</h1>
         <p className={styles.sub}>AskAkashSharma — Admin Panel</p>
