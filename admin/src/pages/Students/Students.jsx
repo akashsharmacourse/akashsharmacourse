@@ -24,6 +24,42 @@ export default function Students() {
   const [deleteStudentId, setDeleteStudentId] = useState(null)
   const [saving, setSaving] = useState(false)
 
+  // Add Student states
+  const [addModal, setAddModal] = useState(false)
+  const [addForm, setAddForm] = useState({ name: '', email: '', phone: '', accessDays: 30 })
+  const [addLoading, setAddLoading] = useState(false)
+  const [addError, setAddError] = useState('')
+
+  const handleAddStudent = async () => {
+    if (!addForm.name || !addForm.email || !addForm.phone) {
+      setAddError('All fields required')
+      return
+    }
+    setAddLoading(true)
+    setAddError('')
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/add-student`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
+        },
+        body: JSON.stringify(addForm),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setAddModal(false)
+        setAddForm({ name: '', email: '', phone: '', accessDays: 30 })
+        fetchData()
+      } else {
+        setAddError(data.error || 'Failed to add student')
+      }
+    } catch (err) {
+      setAddError('Something went wrong')
+    }
+    setAddLoading(false)
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -144,6 +180,9 @@ export default function Students() {
           <h2 className={styles.heading}>Students Registry</h2>
           <p className={styles.sub}>{students.length} registered students</p>
         </div>
+        <button className={styles.addBtn} onClick={() => setAddModal(true)}>
+          + Add Student
+        </button>
       </div>
 
       {loading ? (
@@ -311,6 +350,76 @@ export default function Students() {
           </div>
         </div>
       </Modal>
+
+      {/* Add Student Modal */}
+      {addModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>Add Student Manually</h3>
+
+            {addError && <p className={styles.error}>{addError}</p>}
+
+            <div className={styles.form}>
+              <div className={styles.field}>
+                <label className={styles.label}>Full Name *</label>
+                <input
+                  className={styles.input}
+                  value={addForm.name}
+                  onChange={e => setAddForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="Student name"
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Email *</label>
+                <input
+                  className={styles.input}
+                  type="email"
+                  value={addForm.email}
+                  onChange={e => setAddForm(p => ({ ...p, email: e.target.value }))}
+                  placeholder="student@email.com"
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Phone *</label>
+                <input
+                  className={styles.input}
+                  value={addForm.phone}
+                  onChange={e => setAddForm(p => ({ ...p, phone: e.target.value }))}
+                  placeholder="10-digit number"
+                  maxLength={10}
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Access Days (default 30)</label>
+                <input
+                  className={styles.input}
+                  type="number"
+                  value={addForm.accessDays}
+                  onChange={e => setAddForm(p => ({ ...p, accessDays: Number(e.target.value) }))}
+                  min={1}
+                  max={365}
+                />
+              </div>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.cancelBtn}
+                onClick={() => { setAddModal(false); setAddError('') }}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.saveBtn}
+                onClick={handleAddStudent}
+                disabled={addLoading}
+              >
+                {addLoading ? 'Adding...' : 'Add Student'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Profile Confirm */}
       <ConfirmDialog

@@ -34,4 +34,76 @@ router.delete('/user/:uid', adminMiddleware, async (req, res) => {
   }
 })
 
+// Add student manually by admin
+router.post('/add-student', async (req, res) => {
+  try {
+    const adminSecret = req.headers['x-admin-secret']
+    if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
+      return res.status(403).json({ error: 'Forbidden' })
+    }
+
+    const { name, email, phone, accessDays = 30 } = req.body
+
+    // Generate password
+    const tempPassword = `Akash@${Math.floor(1000 + Math.random() * 9000)}`
+
+    // Create Firebase Auth user
+    let userRecord
+    try {
+      userRecord = await auth.createUser({
+        email,
+        password: tempPassword,
+        displayName: name,
+      })
+    } catch (e) {
+      if (e.code === 'auth/email-already-exists') {
+        return res.status(400).json({ error: 'Student already exists' })
+      }
+      throw e
+    }
+
+    // Get published course
+    const courseSnap = await db.collection('courses')
+      .where('published', '==', true)
+      .limit(1)
+      .get()
+    const courseId = courseSnap.empty ? '' : courseSnap.docs[0].id
+
+    // Access expiry
+    const accessExpiresAt = new Date()
+    accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays)
+
+    // Firestore
+    await db.collection('users').doc(userRecord.uid).set({
+      name,
+      email,
+      phone,
+      hasAccess: true,
+      enrolledCourseId: courseId,
+      completedChapters: [],
+      progress: 0,
+      watchTimeMinutes: 0,
+      createdAt: new Date().toISOString(),
+      accessExpiresAt: accessExpiresAt.toISOString(),
+      paymentAmount: 0,
+      addedManually: true,
+    })
+
+    // Send welcome email
+    const { sendWelcomeEmail } = await import('../utils/sendEmail.js')
+    await sendWelcomeEmail({
+      to: email,
+      name,
+      email,
+      password: tempPassword,
+      loginUrl: process.env.DASHBOARD_URL,
+    })
+
+    res.json({ success: true, uid: userRecord.uid })
+  } catch (err) {
+    console.error('Add student error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
 export default router
