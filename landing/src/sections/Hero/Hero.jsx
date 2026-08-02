@@ -44,12 +44,12 @@ export function Hero() {
         </h1>
 
         <div className={styles.videoCard}>
-          <iframe
+          <video
             src={heroData.videoUrl}
             className={styles.heroVideo}
-            allow="autoplay"
-            allowFullScreen
-            style={{ border: 'none' }}
+            controls
+            loop
+            playsInline
           />
         </div>
 

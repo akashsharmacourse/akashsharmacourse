@@ -8,12 +8,12 @@ const VideoCard = memo(({ t }) => {
   return (
     <div className={styles.card}>
       <div className={styles.videoArea}>
-        <iframe
+        <video
           src={t.videoUrl}
           className={styles.video}
-          allow="autoplay"
-          allowFullScreen
-          style={{ border: 'none' }}
+          controls
+          loop
+          playsInline
         />
       </div>
     </div>
