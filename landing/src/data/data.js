@@ -24,7 +24,7 @@ export const heroData = {
     { value: 600, suffix: "+", label: "Five-Star Reviews" },
     { value: 10, suffix: "+", label: "Years Experience" },
   ],
-  videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/613182bb-9c12-4c7a-b027-30c17a951497/play_720p.mp4",
+  videoUrl: "https://iframe.mediadelivery.net/embed/718710/613182bb-9c12-4c7a-b027-30c17a951497?autoplay=false&loop=true&muted=false",
   videoPlaceholder: false,
 };
 
@@ -135,10 +135,10 @@ export const testimonialsData = {
   badge: "Testimonials",
   heading: "What Students Say",
   testimonials: [
-    { id: 1, name: "Student 1", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/0cc5296a-112d-4ba4-9fce-93fbe09b911f/play_720p.mp4" },
-    { id: 2, name: "Student 2", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/fa77a8ac-ae72-4461-874c-649f99d5fc9c/play_720p.mp4" },
-    { id: 3, name: "Student 3", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/16c9c710-394b-438e-9d2f-81d7687d1b55/play_720p.mp4" },
-    { id: 4, name: "Student 4", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/5475efd6-7900-4fe0-a6cf-d625d69fa67f/play_720p.mp4" },
+    { id: 1, name: "Student 1", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/0cc5296a-112d-4ba4-9fce-93fbe09b911f" },
+    { id: 2, name: "Student 2", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/fa77a8ac-ae72-4461-874c-649f99d5fc9c" },
+    { id: 3, name: "Student 3", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/16c9c710-394b-438e-9d2f-81d7687d1b55" },
+    { id: 4, name: "Student 4", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/5475efd6-7900-4fe0-a6cf-d625d69fa67f" },
   ],
 };
 

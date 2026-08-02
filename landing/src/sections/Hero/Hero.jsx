@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { heroData } from '../../data/data.js';
 import { useInView } from '../../hooks/useInView';
 import { useCountUp } from '../../hooks/useCountUp';
-import { Play, TrendingUp as BadgeIcon } from 'lucide-react';
+import { TrendingUp as BadgeIcon } from 'lucide-react';
 import styles from './Hero.module.css';
 
 function StatItem({ stat, inView, index }) {
@@ -22,41 +22,6 @@ function StatItem({ stat, inView, index }) {
 
 export function Hero() {
   const [ref, inView] = useInView(0.05);
-
-  const videoRef = useRef(null)
-  const [playing, setPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-
-  const togglePlay = (e) => {
-    if (e) e.stopPropagation()
-    const video = videoRef.current
-    if (!video) return
-
-    if (video.paused) {
-      video.muted = false
-      video.play()
-      setPlaying(true)
-    } else {
-      video.pause()
-      setPlaying(false)
-    }
-  }
-
-  const handleProgress = () => {
-    if (!videoRef.current || !videoRef.current.duration) return
-    const percent = (videoRef.current.currentTime / videoRef.current.duration) * 100
-    setProgress(percent)
-  }
-
-  const handleSeek = (e) => {
-    e.stopPropagation()
-    if (!videoRef.current || !videoRef.current.duration) return
-    const bar = e.currentTarget
-    const rect = bar.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const percent = x / rect.width
-    videoRef.current.currentTime = percent * videoRef.current.duration
-  }
 
   return (
     <section 
@@ -78,49 +43,14 @@ export function Hero() {
           <span className={styles.headlineAccent}>Trade With Precision.</span>
         </h1>
 
-        <div
-          className={styles.videoCard}
-          onClick={togglePlay}
-        >
-          <video
-            ref={(el) => {
-              if (el) {
-                videoRef.current = el
-                el.muted = false
-              }
-            }}
-            className={styles.heroVideo}
+        <div className={styles.videoCard}>
+          <iframe
             src={heroData.videoUrl}
-            loop
-            playsInline
-            preload="auto"
-            onTimeUpdate={handleProgress}
-            onContextMenu={e => e.preventDefault()}
+            className={styles.heroVideo}
+            allow="autoplay"
+            allowFullScreen
+            style={{ border: 'none' }}
           />
-
-          {/* Center play button */}
-          {!playing && (
-            <button
-              className={styles.centerPlayBtn}
-              onClick={togglePlay}
-              aria-label="Play"
-            >
-              <Play size={48} fill="white" color="white" />
-            </button>
-          )}
-
-          {/* Progress bar only */}
-          <div className={styles.videoControls}>
-            <div
-              className={styles.progressBar}
-              onClick={handleSeek}
-            >
-              <div
-                className={styles.progressFill}
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
         </div>
 
         <p className={styles.subheadline}>
