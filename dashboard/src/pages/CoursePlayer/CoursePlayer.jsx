@@ -44,6 +44,14 @@ function SecureVideoPlayer({ publicId, studentName, studentEmail }) {
     setLoading(true)
     setError(null)
     try {
+      // Agar direct URL hai (Bunny/http) — directly use karo
+      if (publicId.startsWith('http')) {
+        setVideoUrl(publicId)
+        setLoading(false)
+        return
+      }
+
+      // Cloudinary public_id — backend se signed URL lo
       const auth = getAuth()
       const token = await auth.currentUser.getIdToken()
       const encodedId = encodeURIComponent(publicId)

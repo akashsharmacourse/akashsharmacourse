@@ -24,7 +24,7 @@ export const heroData = {
     { value: 600, suffix: "+", label: "Five-Star Reviews" },
     { value: 10, suffix: "+", label: "Years Experience" },
   ],
-  videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587205/WhatsApp_Video_2026-08-01_at_17.50.31_n17alw.mp4",
+  videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/613182bb-9c12-4c7a-b027-30c17a951497/play_720p.mp4",
   videoPlaceholder: false,
 };
 
@@ -135,34 +135,10 @@ export const testimonialsData = {
   badge: "Testimonials",
   heading: "What Students Say",
   testimonials: [
-    {
-      id: 1,
-      name: "Student 1",
-      role: "Student",
-      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587246/WhatsApp_Video_2026-07-22_at_12.38.02_xs0rrk.mp4",
-      videoPlaceholder: false,
-    },
-    {
-      id: 2,
-      name: "Student 2",
-      role: "Student",
-      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587233/WhatsApp_Video_2026-07-22_at_12.38.03_ftnryb.mp4",
-      videoPlaceholder: false,
-    },
-    {
-      id: 3,
-      name: "Student 3",
-      role: "Student",
-      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587203/WhatsApp_Video_2026-07-22_at_12.38.02_1_o1rknv.mp4",
-      videoPlaceholder: false,
-    },
-    {
-      id: 4,
-      name: "Student 4",
-      role: "Student",
-      videoUrl: "https://res.cloudinary.com/tmgtqqqg/video/upload/v1785587195/WhatsApp_Video_2026-07-22_at_12.38.01_bs3wnf.mp4",
-      videoPlaceholder: false,
-    },
+    { id: 1, name: "Student 1", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/0cc5296a-112d-4ba4-9fce-93fbe09b911f/play_720p.mp4" },
+    { id: 2, name: "Student 2", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/fa77a8ac-ae72-4461-874c-649f99d5fc9c/play_720p.mp4" },
+    { id: 3, name: "Student 3", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/16c9c710-394b-438e-9d2f-81d7687d1b55/play_720p.mp4" },
+    { id: 4, name: "Student 4", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/5475efd6-7900-4fe0-a6cf-d625d69fa67f/play_720p.mp4" },
   ],
 };
 
