@@ -24,7 +24,7 @@ export const heroData = {
     { value: 600, suffix: "+", label: "Five-Star Reviews" },
     { value: 10, suffix: "+", label: "Years Experience" },
   ],
-  videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/613182bb-9c12-4c7a-b027-30c17a951497/original",
+  videoUrl: "https://iframe.mediadelivery.net/embed/718710/613182bb-9c12-4c7a-b027-30c17a951497?autoplay=false",
   videoPlaceholder: false,
 };
 
@@ -69,8 +69,8 @@ export const courseData = {
       },
     ],
     benefits: [
-      "Access to course content",
-      "WhatsApp support from Akash Sir",
+      "Access to course content for 30 days",
+      "WhatsApp support from Akash",
       "Private student community access",
       "Live session recordings",
       "PDF study materials included",
@@ -135,10 +135,10 @@ export const testimonialsData = {
   badge: "Testimonials",
   heading: "What Students Say",
   testimonials: [
-    { id: 1, name: "Student 1", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/0cc5296a-112d-4ba4-9fce-93fbe09b911f/original" },
-    { id: 2, name: "Student 2", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/fa77a8ac-ae72-4461-874c-649f99d5fc9c/original" },
-    { id: 3, name: "Student 3", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/16c9c710-394b-438e-9d2f-81d7687d1b55/original" },
-    { id: 4, name: "Student 4", role: "Student", videoPlaceholder: false, videoUrl: "https://vz-bf9846c5-42e.b-cdn.net/5475efd6-7900-4fe0-a6cf-d625d69fa67f/original" },
+    { id: 1, name: "Student 1", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/0cc5296a-112d-4ba4-9fce-93fbe09b911f?autoplay=false" },
+    { id: 2, name: "Student 2", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/fa77a8ac-ae72-4461-874c-649f99d5fc9c?autoplay=false" },
+    { id: 3, name: "Student 3", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/16c9c710-394b-438e-9d2f-81d7687d1b55?autoplay=false" },
+    { id: 4, name: "Student 4", role: "Student", videoPlaceholder: false, videoUrl: "https://iframe.mediadelivery.net/embed/718710/5475efd6-7900-4fe0-a6cf-d625d69fa67f?autoplay=false" },
   ],
 };
 
@@ -153,7 +153,7 @@ export const pricingData = {
   features: [
     "All 3 Course Modules — Long Term, Intraday, Swing",
     "Access to course content",
-    "WhatsApp Support from Akash Sir",
+    "WhatsApp Support from Akash",
     "Private Student Community Access",
     "Live Session Recordings",
     "PDF Study Materials",
@@ -197,7 +197,7 @@ export const faqData = {
     },
     {
       q: "What do I get after enrolling?",
-      a: "Immediate access to all 3 modules, PDF materials, private WhatsApp community, and WhatsApp support from Akash Sir.",
+      a: "Immediate access to all 3 modules, PDF materials, private WhatsApp community, and WhatsApp support from Akash.",
     },
     {
       q: "Do I need a Demat account before joining?",
@@ -209,7 +209,7 @@ export const faqData = {
     },
     {
       q: "Will I get support after completing the course?",
-      a: "Absolutely. WhatsApp support included. Reach out with any question — even years later — and Akash Sir will personally respond.",
+      a: "Absolutely. WhatsApp support included. Reach out with any question — even years later — and Akash will personally respond.",
     },
     {
       q: "How is this different from free YouTube content?",
@@ -256,7 +256,7 @@ export const oneOnOneData = {
   // HERO
   hero: {
     badge: "Private Trading Access",
-    headlineTop: "Trade With Akash Sir.",
+    headlineTop: "Trade With Akash.",
     headlineBottom: "One to One Live Sessions.",
     subheadline: "Get exclusive 2-week private access — all classes Live Zoom sessions, One to One discussions, trade setups discussed one day in advance.",
     ctaPrimary: "Get Access Now",
@@ -274,7 +274,7 @@ export const oneOnOneData = {
       {
         icon: "TrendingUp",
         title: "Daily Chart Analysis",
-        desc: "Akash Sir analyses charts with you — every trading day for 2 full weeks.",
+        desc: "Akash analyses charts with you — every trading day for 2 full weeks.",
       },
       {
         icon: "Calendar",
@@ -284,7 +284,7 @@ export const oneOnOneData = {
       {
         icon: "MessageCircle",
         title: "Direct WhatsApp Access",
-        desc: "Ask anything, anytime — direct access to Akash Sir on WhatsApp.",
+        desc: "Ask anything, anytime — direct access to Akash on WhatsApp.",
       },
       {
         icon: "Users",
@@ -315,7 +315,7 @@ export const oneOnOneData = {
       "2 weeks of private trading access",
       "Daily chart analysis — every trading day",
       "Trade setups shared one day in advance",
-      "Direct WhatsApp access to Akash Sir",
+      "Direct WhatsApp access to Akash ",
       "Entry, exit and stop-loss levels discussed daily",
       "Weekend review sessions",
       "Exclusive private community access",
@@ -370,7 +370,7 @@ export const oneOnOneData = {
       },
       {
         q: "Do I need any prior trading knowledge?",
-        a: "No. Whether you are a beginner or experienced trader, Akash Sir guides you step by step.",
+        a: "No. Whether you are a beginner or experienced trader, Akash guides you step by step.",
       }
     ],
   },
@@ -437,7 +437,7 @@ export const courseSuccessData = {
 export const oneOnOneSuccessData = {
   badge: "Payment Successful",
   heading: "Session Confirmed!",
-  subheading: "Your 1-on-1 session with Akash Sir is booked. Click below to choose your slot.",
+  subheading: "Your 1-on-1 session with Akash is booked. Click below to choose your slot.",
   steps: [
     {
       icon: "Calendar",
@@ -452,7 +452,7 @@ export const oneOnOneSuccessData = {
     {
       icon: "MessageCircle",
       title: "Join WhatsApp Group",
-      desc: "Get session reminders and connect with Akash Sir directly.",
+      desc: "Get session reminders and connect with Akash directly.",
     },
   ],
   calendlyCta: "Book Your Session Slot",
