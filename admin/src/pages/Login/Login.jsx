@@ -35,7 +35,7 @@ export default function Login() {
       <div className={styles.card}>
         <div className={styles.iconWrap}>
           <img
-            src="https://res.cloudinary.com/tmgtqqqg/image/upload/v1785589653/IMG_2488.JPG_qgh8kt.jpg"
+            src="https://i.ibb.co/k6qGF2t6/IMG-2488-JPG.jpg"
             alt="AskAkashSharma Logo"
             style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
           />
