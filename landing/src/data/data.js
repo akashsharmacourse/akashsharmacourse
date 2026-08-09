@@ -1,6 +1,6 @@
 // ─── NAVBAR ───────────────────────────────────────────
 export const navData = {
-  logo: "AskAkashSharma",
+  logo: "https://i.ibb.co/k6qGF2t6/IMG-2488-JPG.jpg",
   links: [
     { label: "Home", href: "/" },
     { label: "1to1", href: "/1to1" },
@@ -89,7 +89,7 @@ export const aboutData = {
   name: "Akash Sharma",
   title: "Professional Stock Market Trader & Coach",
   bio: "A results-driven professional with over a decade of hands-on experience in equities, intraday, and swing trading. I teach one proven strategy in plain language — so anyone can trade with clarity and confidence.",
-  image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587718/IMG_2487_xesbyy.png",
+  image: "https://i.ibb.co/nNzQdFYQ/IMG-2487.png",
   imageAlt: "Akash Sharma — Stock Market Coach",
   imagePlaceholder: false,
   stats: [
@@ -108,7 +108,7 @@ export const pnlProofData = {
   disclaimer: "Past performance is not indicative of future results. Trading involves risk.",
   proof: {
     id: 1,
-    image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587345/Screenshot_2026-08-01_175844_rafsmk.png",
+    image: "https://i.ibb.co/xKZLd33m/Screenshot-2026-08-09-215818.png",
     imageAlt: "Verified PnL Screenshot — Akash Sharma",
     placeholder: false,
   },
@@ -122,10 +122,10 @@ export const studentResultsData = {
   heading: "Students Who Transformed Their Trading",
   subheading: "Real results. Real students. Shared with permission.",
   results: [
-    { id: 1, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587181/IMG_2336_an2kpe.jpg", label: "Student Result 1" },
-    { id: 2, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2338_o4hfam.jpg", label: "Student Result 2" },
-    { id: 3, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2339_puc61m.jpg", label: "Student Result 3" },
-    { id: 4, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587181/IMG_2336_an2kpe.jpg", label: "Student Result 4" },
+    { id: 1, placeholder: false, image: "https://i.ibb.co/5hXS6F82/IMG-2336.jpg", label: "Student Result 1" },
+    { id: 2, placeholder: false, image: "https://i.ibb.co/qMbB5Q0M/IMG-2338.jpg", label: "Student Result 2" },
+    { id: 3, placeholder: false, image: "https://i.ibb.co/Z6G5yZKM/IMG-2339.jpg", label: "Student Result 3" },
+    { id: 4, placeholder: false, image: "https://i.ibb.co/jPxfk10k/IMG-2341.jpg", label: "Student Result 4" },
   ],
   note: "Results vary based on individual effort and market conditions.",
 };
@@ -165,19 +165,19 @@ export const pricingData = {
   paymentMethods: [
     {
       name: "UPI",
-      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_1_d18ghx.png"
+      logo: "https://i.ibb.co/Q3mYq0s9/download-1.png"
     },
     {
       name: "Google Pay",
-      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_f9hbta.jpg"
+      logo: "https://i.ibb.co/yFwFnfN0/download.jpg"
     },
     {
       name: "PhonePe",
-      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/images_teirl9.png"
+      logo: "https://i.ibb.co/XZFvP593/images.png"
     },
     {
       name: "Razorpay",
-      logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_yzhhqz.png"
+      logo: "https://i.ibb.co/qLbKHcB8/download.png"
     },
   ],
 };
@@ -261,7 +261,7 @@ export const oneOnOneData = {
     subheadline: "Get exclusive 2-week private access — all classes Live Zoom sessions, One to One discussions, trade setups discussed one day in advance.",
     ctaPrimary: "Get Access Now",
     ctaSecondary: "View Results",
-    image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587718/IMG_2487_xesbyy.png",
+    image: "https://i.ibb.co/nNzQdFYQ/IMG-2487.png",
     imageAlt: "Akash Sharma — Personal Trading Coach",
   },
 
@@ -326,19 +326,19 @@ export const oneOnOneData = {
     paymentMethods: [
       {
         name: "UPI",
-        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_1_d18ghx.png"
+        logo: "https://i.ibb.co/Q3mYq0s9/download-1.png"
       },
       {
         name: "Google Pay",
-        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_f9hbta.jpg"
+        logo: "https://i.ibb.co/yFwFnfN0/download.jpg"
       },
       {
         name: "PhonePe",
-        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/images_teirl9.png"
+        logo: "https://i.ibb.co/XZFvP593/images.png"
       },
       {
         name: "Razorpay",
-        logo: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785590436/download_yzhhqz.png"
+        logo: "https://i.ibb.co/qLbKHcB8/download.png"
       },
     ],
   },
@@ -349,9 +349,9 @@ export const oneOnOneData = {
     heading: "Real Results from Our Students",
     subheading: "Real results. Real students. Shared with permission.",
     images: [
-      { id: 1, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587181/IMG_2336_an2kpe.jpg", label: "Student Result 1" },
-      { id: 2, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2338_o4hfam.jpg", label: "Student Result 2" },
-      { id: 3, placeholder: false, image: "https://res.cloudinary.com/tmgtqqqg/image/upload/v1785587182/IMG_2339_puc61m.jpg", label: "Student Result 3" },
+      { id: 1, placeholder: false, image: "https://i.ibb.co/5hXS6F82/IMG-2336.jpg", label: "Student Result 1" },
+      { id: 2, placeholder: false, image: "https://i.ibb.co/qMbB5Q0M/IMG-2338.jpg", label: "Student Result 2" },
+      { id: 3, placeholder: false, image: "https://i.ibb.co/Z6G5yZKM/IMG-2339.jpg", label: "Student Result 3" },
     ],
   },
 

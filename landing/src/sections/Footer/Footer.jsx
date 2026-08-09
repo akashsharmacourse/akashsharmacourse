@@ -21,7 +21,7 @@ export function Footer() {
         <div className={styles.topRow}>
           <div className={styles.brandBlock}>
             <img
-              src="https://res.cloudinary.com/tmgtqqqg/image/upload/v1785589653/IMG_2488.JPG_qgh8kt.jpg"
+              src="https://i.ibb.co/k6qGF2t6/IMG-2488-JPG.jpg"
               alt="AskAkashSharma"
               className={styles.footerLogo}
             />
