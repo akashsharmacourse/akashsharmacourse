@@ -56,7 +56,9 @@ export default function Home() {
       {/* Continue learning */}
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>Continue Learning</h3>
-        {true ? (
+        {userData?.hasAccess !== false && 
+         userData?.enrolledCourseId &&
+         (!userData?.accessExpiresAt || new Date(userData.accessExpiresAt) > new Date()) ? (
           <div className={styles.courseGrid}>
             <div className={styles.courseCard}>
               <div className={styles.courseInfo}>

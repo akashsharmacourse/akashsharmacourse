@@ -311,6 +311,17 @@ export default function CoursePlayer() {
   const [showPdf, setShowPdf] = useState(false)
 
   useEffect(() => {
+    if (!userData) return
+
+    const isExpired = userData?.accessExpiresAt && 
+      new Date(userData.accessExpiresAt) < new Date()
+    const isRevoked = userData?.hasAccess === false
+
+    if (isExpired || isRevoked) {
+      navigate('/courses')
+      return
+    }
+
     const fetchCourse = async () => {
       try {
         const coursesSnap = await getDocs(
@@ -339,8 +350,8 @@ export default function CoursePlayer() {
       }
       setLoading(false)
     }
-    if (userData) fetchCourse()
-  }, [userData])
+    fetchCourse()
+  }, [userData, navigate])
 
   // Mark video complete
   const markComplete = async () => {

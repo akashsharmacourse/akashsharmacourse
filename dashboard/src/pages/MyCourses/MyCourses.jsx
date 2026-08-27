@@ -11,8 +11,22 @@ export default function MyCourses() {
   const navigate = useNavigate()
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [accessDenied, setAccessDenied] = useState(false)
 
   useEffect(() => {
+    if (!userData) return
+
+    const isExpired = userData?.accessExpiresAt && 
+      new Date(userData.accessExpiresAt) < new Date()
+    const isRevoked = userData?.hasAccess === false
+
+    if (isExpired || isRevoked) {
+      setCourse(null)
+      setLoading(false)
+      setAccessDenied(true)
+      return
+    }
+
     const fetchCourse = async () => {
       try {
         const coursesSnap = await getDocs(
@@ -30,8 +44,27 @@ export default function MyCourses() {
       }
       setLoading(false)
     }
-    if (userData) fetchCourse()
+    fetchCourse()
   }, [userData])
+
+  if (accessDenied) return (
+    <div className={styles.page}>
+      <div className={styles.empty}>
+        <h3 style={{ color: 'var(--danger)' }}>
+          {userData?.hasAccess === false ? 'Access Revoked' : 'Access Expired'}
+        </h3>
+        <p>
+          {userData?.hasAccess === false 
+            ? 'Your access has been revoked. Contact support.'
+            : 'Your 30-day access has ended. Re-enroll to continue.'
+          }
+        </p>
+        <a href="https://askakashsharma.in/enroll" className={styles.enrollBtn}>
+          Re-Enroll Now →
+        </a>
+      </div>
+    </div>
+  )
 
   return (
     <div className={styles.page}>

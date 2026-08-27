@@ -1,34 +1,28 @@
-import { useEffect, useState } from 'react'
-import {
-  collection, getDocs, doc, updateDoc, deleteDoc
-} from 'firebase/firestore'
+import { useEffect, useState, useMemo } from 'react'
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase.js'
-import { Users, Mail, Phone, BookOpen, Trash2, Award, Calendar, AlertCircle, Clock } from 'lucide-react'
-import Modal from '../../components/Modal/Modal.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
 import styles from './Students.module.css'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+const ADMIN_SECRET = import.meta.env.VITE_ADMIN_SECRET
 
 export default function Students() {
   const [students, setStudents] = useState([])
-  const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [activeTab, setActiveTab] = useState('all')
+  const [sortBy, setSortBy] = useState('newest')
+  const [deleteId, setDeleteId] = useState(null)
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
-  // Enrollment Modal states
-  const [enrollModalOpen, setEnrollModalOpen] = useState(false)
-  const [selectedStudent, setSelectedStudent] = useState(null)
-  const [enrollForm, setEnrollForm] = useState({}) // { [courseId]: boolean }
-
-  // Deletion States
-  const [deleteStudentId, setDeleteStudentId] = useState(null)
-  const [saving, setSaving] = useState(false)
-
-  // Add Student states
   const [addModal, setAddModal] = useState(false)
   const [addForm, setAddForm] = useState({ name: '', email: '', phone: '', accessDays: 30 })
   const [addLoading, setAddLoading] = useState(false)
   const [addError, setAddError] = useState('')
+
+  useEffect(() => { fetchStudents() }, [])
 
   const handleAddStudent = async () => {
     if (!addForm.name || !addForm.email || !addForm.phone) {
@@ -38,11 +32,11 @@ export default function Students() {
     setAddLoading(true)
     setAddError('')
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/add-student`, {
+      const res = await fetch(`${BACKEND_URL}/api/auth/add-student`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
+          'x-admin-secret': ADMIN_SECRET,
         },
         body: JSON.stringify(addForm),
       })
@@ -50,315 +44,411 @@ export default function Students() {
       if (data.success) {
         setAddModal(false)
         setAddForm({ name: '', email: '', phone: '', accessDays: 30 })
-        fetchData()
+        fetchStudents()
       } else {
         setAddError(data.error || 'Failed to add student')
       }
-    } catch (err) {
+    } catch {
       setAddError('Something went wrong')
     }
     setAddLoading(false)
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
-    setLoading(true)
-    try {
-      // Fetch all students
-      const usersSnap = await getDocs(collection(db, 'users'))
-      setStudents(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })))
-
-      // Fetch all courses for enrollment selector
-      const coursesSnap = await getDocs(collection(db, 'courses'))
-      setCourses(coursesSnap.docs.map(d => ({ id: d.id, ...d.data() })))
-    } catch (err) {
-      console.error('Fetch students error:', err)
-    }
+  const fetchStudents = async () => {
+    const snap = await getDocs(collection(db, 'users'))
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    setStudents(data)
     setLoading(false)
   }
 
-  const openEnrollment = (student) => {
-    setSelectedStudent(student)
-    // Build initial checklist mapping courseId to boolean check status
-    const initialChecked = {}
-    courses.forEach(course => {
-      const isEnrolled = student.enrolledCourses?.some(c => c.id === course.id)
-      initialChecked[course.id] = !!isEnrolled
+  const getStatus = (s) => {
+    if (s.hasAccess === false) return 'revoked'
+    if (s.accessExpiresAt && new Date(s.accessExpiresAt) < new Date()) return 'expired'
+    return 'active'
+  }
+
+  const filtered = useMemo(() => {
+    let result = [...students]
+
+    // Tab filter
+    if (activeTab !== 'all') {
+      result = result.filter(s => getStatus(s) === activeTab)
+    }
+
+    // Search
+    if (search) {
+      const q = search.toLowerCase()
+      result = result.filter(s =>
+        s.name?.toLowerCase().includes(q) ||
+        s.email?.toLowerCase().includes(q) ||
+        s.phone?.includes(q)
+      )
+    }
+
+    // Date range
+    if (dateFrom) {
+      result = result.filter(s =>
+        s.createdAt && new Date(s.createdAt) >= new Date(dateFrom)
+      )
+    }
+    if (dateTo) {
+      result = result.filter(s =>
+        s.createdAt && new Date(s.createdAt) <= new Date(dateTo + 'T23:59:59')
+      )
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      if (sortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt)
+      if (sortBy === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt)
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '')
+      if (sortBy === 'expiry') return new Date(a.accessExpiresAt) - new Date(b.accessExpiresAt)
+      return 0
     })
-    setEnrollForm(initialChecked)
-    setEnrollModalOpen(true)
+
+    return result
+  }, [students, search, activeTab, sortBy, dateFrom, dateTo])
+
+  // Stats
+  const stats = useMemo(() => ({
+    total: students.length,
+    active: students.filter(s => getStatus(s) === 'active').length,
+    expired: students.filter(s => getStatus(s) === 'expired').length,
+    revoked: students.filter(s => getStatus(s) === 'revoked').length,
+    revenue: students.reduce((sum, s) => sum + (s.paymentAmount || 0), 0),
+  }), [students])
+
+  const toggleAccess = async (s) => {
+    const newAccess = s.hasAccess === false ? true : false
+    await updateDoc(doc(db, 'users', s.id), { hasAccess: newAccess })
+    fetchStudents()
   }
 
-  const handleSaveEnrollments = async () => {
-    if (!selectedStudent) return
-    setSaving(true)
-    try {
-      // Build new enrolledCourses array
-      const newEnrolledCourses = []
-      courses.forEach(course => {
-        if (enrollForm[course.id]) {
-          // Find original progress if they were already enrolled, else default 0
-          const original = selectedStudent.enrolledCourses?.find(c => c.id === course.id)
-          newEnrolledCourses.push({
-            id: course.id,
-            title: course.title,
-            description: course.description || '',
-            progress: original ? original.progress || 0 : 0
-          })
-        }
-      })
-
-      // Calculate new aggregate progress (average)
-      let overallProgress = 0
-      if (newEnrolledCourses.length > 0) {
-        const sum = newEnrolledCourses.reduce((s, c) => s + (c.progress || 0), 0)
-        overallProgress = Math.round(sum / newEnrolledCourses.length)
-      }
-
-      await updateDoc(doc(db, 'users', selectedStudent.id), {
-        enrolledCourses: newEnrolledCourses,
-        progress: overallProgress
-      })
-
-      setEnrollModalOpen(false)
-      fetchData()
-    } catch (err) {
-      console.error('Update student enrollments error:', err)
-    }
-    setSaving(false)
+  const extendAccess = async (s) => {
+    const current = s.accessExpiresAt ? new Date(s.accessExpiresAt) : new Date()
+    const extended = new Date(Math.max(current, new Date()))
+    extended.setDate(extended.getDate() + 30)
+    await updateDoc(doc(db, 'users', s.id), {
+      accessExpiresAt: extended.toISOString(),
+      hasAccess: true,
+    })
+    fetchStudents()
   }
 
-  const handleDeleteStudent = async () => {
-    if (!deleteStudentId) return
+  const handleDelete = async () => {
+    if (!deleteId) return
     try {
-      // Delete from Firebase Auth via backend
-      await fetch(`${BACKEND_URL}/api/auth/user/${deleteStudentId}`, {
+      await fetch(`${BACKEND_URL}/api/auth/user/${deleteId}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
-        },
+        headers: { 'x-admin-secret': ADMIN_SECRET },
       })
-      console.log('Auth user deleted')
-    } catch (err) {
-      console.error('Auth delete error:', err)
-    }
-
-    try {
-      await deleteDoc(doc(db, 'users', deleteStudentId))
-      setDeleteStudentId(null)
-      fetchData()
-    } catch (err) {
-      console.error('Delete student error:', err)
-    }
+    } catch {}
+    await deleteDoc(doc(db, 'users', deleteId))
+    setDeleteId(null)
+    fetchStudents()
   }
 
-  const handleCheckboxChange = (courseId) => {
-    setEnrollForm(prev => ({
-      ...prev,
-      [courseId]: !prev[courseId]
-    }))
+  const tabs = [
+    { key: 'all', label: 'All', count: stats.total },
+    { key: 'active', label: 'Active ✅', count: stats.active },
+    { key: 'expired', label: 'Expired ⚠️', count: stats.expired },
+    { key: 'revoked', label: 'Revoked ❌', count: stats.revoked },
+  ]
+
+  const statusConfig = {
+    active: { label: 'Active', cls: styles.active },
+    expired: { label: 'Expired', cls: styles.expired },
+    revoked: { label: 'Revoked', cls: styles.revoked },
   }
 
-  const toggleAccess = async (student) => {
-    try {
-      await updateDoc(doc(db, 'users', student.id), {
-        hasAccess: student.hasAccess === false ? true : false
-      })
-      fetchData()
-    } catch (err) {
-      console.error('Toggle access error:', err)
-    }
-  }
+  if (loading) return <div className={styles.loading}>Loading students...</div>
 
   return (
     <div className={styles.page}>
+
+      {/* Header */}
       <div className={styles.header}>
         <div>
-          <h2 className={styles.heading}>Students Registry</h2>
-          <p className={styles.sub}>{students.length} registered students</p>
+          <h2 className={styles.heading}>Students</h2>
+          <p className={styles.sub}>{stats.total} total enrolled</p>
         </div>
         <button className={styles.addBtn} onClick={() => setAddModal(true)}>
           + Add Student
         </button>
       </div>
 
-      {loading ? (
-        <div className={styles.loading}>Loading students database...</div>
-      ) : students.length > 0 ? (
-        <div className={styles.grid}>
-          {students.map((student) => {
-            const enrolledList = student.enrolledCourses || []
-            const completedCount = student.completedChapters?.length || 0
+      {/* Stats */}
+      <div className={styles.statsGrid}>
+        {[
+          { label: 'Total', value: stats.total, cls: '' },
+          { label: 'Active', value: stats.active, cls: styles.statActive },
+          { label: 'Expired', value: stats.expired, cls: styles.statExpired },
+          { label: 'Revoked', value: stats.revoked, cls: styles.statRevoked },
+          { label: 'Revenue', value: `₹${stats.revenue.toLocaleString('en-IN')}`, cls: '' },
+        ].map((s, i) => (
+          <div key={i} className={styles.statCard}>
+            <div className={`${styles.statValue} ${s.cls}`}>{s.value}</div>
+            <div className={styles.statLabel}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        {tabs.map(t => (
+          <button
+            key={t.key}
+            className={`${styles.tab} ${activeTab === t.key ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab(t.key)}
+          >
+            {t.label}
+            <span className={styles.tabCount}>{t.count}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className={styles.filters}>
+        <input
+          type="text"
+          placeholder="Search name, email, phone..."
+          className={styles.searchInput}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <select
+          className={styles.select}
+          value={sortBy}
+          onChange={e => setSortBy(e.target.value)}
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="name">Name A-Z</option>
+          <option value="expiry">Expiry Soon</option>
+        </select>
+        <input
+          type="date"
+          className={styles.dateInput}
+          value={dateFrom}
+          onChange={e => setDateFrom(e.target.value)}
+          placeholder="From date"
+        />
+        <input
+          type="date"
+          className={styles.dateInput}
+          value={dateTo}
+          onChange={e => setDateTo(e.target.value)}
+          placeholder="To date"
+        />
+        {(dateFrom || dateTo || search) && (
+          <button
+            className={styles.clearBtn}
+            onClick={() => { setSearch(''); setDateFrom(''); setDateTo('') }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Results count */}
+      <p className={styles.resultsCount}>
+        Showing {filtered.length} of {students.length} students
+      </p>
+
+      {/* Desktop Table */}
+      <div className={styles.tableWrap}>
+        <div className={styles.table}>
+          <div className={styles.tableHeader}>
+            <span>Student</span>
+            <span>Phone</span>
+            <span>Enrolled</span>
+            <span>Expires</span>
+            <span>Lessons</span>
+            <span>Amount</span>
+            <span>Status</span>
+            <span>Actions</span>
+          </div>
+
+          {filtered.length > 0 ? filtered.map(s => {
+            const status = getStatus(s)
+            const cfg = statusConfig[status]
+            const daysLeft = s.accessExpiresAt
+              ? Math.ceil((new Date(s.accessExpiresAt) - new Date()) / (1000 * 60 * 60 * 24))
+              : null
 
             return (
-              <div key={student.id} className={styles.card}>
-                {/* Header with avatar */}
-                <div className={styles.cardHeader}>
+              <div key={s.id} className={styles.tableRow}>
+                {/* Student info */}
+                <div className={styles.studentInfo}>
                   <div className={styles.avatar}>
-                    {student.name?.charAt(0).toUpperCase() || 'S'}
+                    {s.name?.charAt(0).toUpperCase() || 'S'}
                   </div>
-                  <div className={styles.meta}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <h3 className={styles.name}>{student.name || 'Student'}</h3>
-                      <span className={`${styles.accessBadge} ${student.hasAccess !== false ? styles.active : styles.inactive}`}>
-                        {student.hasAccess !== false ? 'Active' : 'Revoked'}
-                      </span>
+                  <div>
+                    <div className={styles.studentName}>
+                      {s.name || '—'}
+                      {(s.enrolledCourseId || s.enrolledCourses?.length > 0) && (
+                        <span className={styles.enrolledBadge}>1 enrolled</span>
+                      )}
                     </div>
-                    <span className={styles.email}>
-                      <Mail size={12} />
-                      {student.email || 'No email'}
-                    </span>
+                    <div className={styles.studentEmail}>{s.email || '—'}</div>
                   </div>
                 </div>
 
-                {/* Details info */}
-                <div className={styles.details}>
-                  {student.phone && (
-                    <div className={styles.detailItem}>
-                      <Phone size={13} className={styles.detailIcon} />
-                      <span>{student.phone}</span>
-                    </div>
-                  )}
-                  <div className={styles.detailItem}>
-                    <Calendar size={13} className={styles.detailIcon} />
-                    <span className={styles.dateText}>
-                      Joined: {student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-IN') : '—'}
-                    </span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <Clock size={13} className={styles.detailIcon} />
-                    <span className={styles.dateText}>
-                      Expires: {student.accessExpiresAt
-                        ? new Date(student.accessExpiresAt).toLocaleDateString('en-IN')
-                        : 'Never'}
-                    </span>
-                  </div>
-                </div>
+                <span className={styles.phone}>{s.phone || '—'}</span>
 
-                {/* Course indicators */}
-                <div className={styles.coursesSection}>
-                  <div className={styles.coursesHeader}>
-                    <BookOpen size={14} className={styles.coursesIcon} />
-                    <span className={styles.coursesLabel}>
-                      Enrolled Courses ({enrolledList.length})
+                <span className={styles.date}>
+                  {s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-IN') : '—'}
+                </span>
+
+                <div>
+                  <span className={styles.date}>
+                    {s.accessExpiresAt ? new Date(s.accessExpiresAt).toLocaleDateString('en-IN') : '—'}
+                  </span>
+                  {daysLeft !== null && status === 'active' && (
+                    <span className={`${styles.daysLeft} ${daysLeft <= 7 ? styles.daysWarning : ''}`}>
+                      {daysLeft > 0 ? `${daysLeft}d left` : 'Today'}
                     </span>
-                  </div>
-                  {enrolledList.length > 0 ? (
-                    <div className={styles.tagsList}>
-                      {enrolledList.map((c, idx) => (
-                        <span key={idx} className={styles.courseTag} title={c.title}>
-                          {c.title} ({c.progress || 0}%)
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className={styles.noCourses}>No courses enrolled.</div>
                   )}
                 </div>
 
-                {/* Completed chapters total */}
-                <div className={styles.achievements}>
-                  <Award size={14} className={styles.completedIcon} />
-                  <span>{completedCount} Completed Lessons</span>
-                </div>
+                <span className={styles.lessons}>
+                  {new Set(s.completedChapters || []).size}
+                </span>
 
-                {/* Actions footer */}
-                <div className={styles.cardActions}>
+                <span className={styles.amount}>
+                  {s.paymentAmount ? `₹${s.paymentAmount.toLocaleString('en-IN')}` : '—'}
+                </span>
+
+                <span className={`${styles.badge} ${cfg.cls}`}>
+                  {cfg.label}
+                </span>
+
+                <div className={styles.actions}>
+                  {/* Grant/Revoke */}
                   <button
-                    className={styles.enrollBtn}
-                    onClick={() => openEnrollment(student)}
+                    className={`${styles.actionBtn} ${status !== 'revoked' ? styles.revokeBtn : styles.grantBtn}`}
+                    onClick={() => toggleAccess(s)}
+                    title={status !== 'revoked' ? 'Revoke Access' : 'Grant Access'}
                   >
-                    Manage Courses
+                    {status !== 'revoked' ? 'Revoke' : 'Grant'}
                   </button>
+
+                  {/* Extend +30 days */}
                   <button
-                    className={styles.accessBtn}
-                    onClick={() => toggleAccess(student)}
-                    title={student.hasAccess === false ? 'Grant Access' : 'Revoke Access'}
+                    className={`${styles.actionBtn} ${styles.extendBtn}`}
+                    onClick={() => extendAccess(s)}
+                    title="Extend +30 days"
                   >
-                    {student.hasAccess === false ? 'Grant' : 'Revoke'}
+                    +30d
                   </button>
+
+                  {/* Delete */}
                   <button
-                    className={styles.deleteBtn}
-                    onClick={() => setDeleteStudentId(student.id)}
-                    title="Delete Student Profile"
+                    className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                    onClick={() => setDeleteId(s.id)}
+                    title="Delete Student"
                   >
-                    <Trash2 size={14} />
+                    ✕
                   </button>
                 </div>
               </div>
             )
-          })}
-        </div>
-      ) : (
-        <div className={styles.empty}>
-          <Users size={48} className={styles.emptyIcon} />
-          <h3>No Students Found</h3>
-          <p>Once students register and log into the portal, they will appear here.</p>
-        </div>
-      )}
-
-      {/* Manage Enrollments Modal */}
-      <Modal
-        isOpen={enrollModalOpen}
-        onClose={() => setEnrollModalOpen(false)}
-        title={`Enrollments: ${selectedStudent?.name || 'Student'}`}
-        size="md"
-      >
-        <div className={styles.enrollForm}>
-          <p className={styles.formDesc}>
-            Check the courses you want to enroll this student in. Uncheck to unenroll.
-          </p>
-
-          {courses.length > 0 ? (
-            <div className={styles.checklist}>
-              {courses.map(course => (
-                <label key={course.id} className={styles.checkItem}>
-                  <input
-                    type="checkbox"
-                    checked={!!enrollForm[course.id]}
-                    onChange={() => handleCheckboxChange(course.id)}
-                    className={styles.checkbox}
-                  />
-                  <div className={styles.checkTexts}>
-                    <span className={styles.checkTitle}>{course.title}</span>
-                    <span className={styles.checkPrice}>₹{course.price?.toLocaleString('en-IN') || 0}</span>
-                  </div>
-                </label>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyChecklist}>
-              <AlertCircle size={24} />
-              <p>No courses available in catalog. Please create a course first.</p>
-            </div>
+          }) : (
+            <div className={styles.emptyRow}>No students found.</div>
           )}
-
-          <div className={styles.modalActions}>
-            <button className={styles.cancelBtn} onClick={() => setEnrollModalOpen(false)}>
-              Cancel
-            </button>
-            <button
-              className={styles.saveBtn}
-              onClick={handleSaveEnrollments}
-              disabled={saving || courses.length === 0}
-            >
-              {saving ? 'Updating...' : 'Save Enrollments'}
-            </button>
-          </div>
         </div>
-      </Modal>
+      </div>
 
-      {/* Add Student Modal */}
+      {/* Mobile Cards */}
+      <div className={styles.mobileCards}>
+        {filtered.length > 0 ? filtered.map(s => {
+          const status = getStatus(s)
+          const cfg = statusConfig[status]
+          const daysLeft = s.accessExpiresAt
+            ? Math.ceil((new Date(s.accessExpiresAt) - new Date()) / (1000 * 60 * 60 * 24))
+            : null
+
+          return (
+            <div key={s.id} className={styles.mobileCard}>
+              <div className={styles.mobileCardTop}>
+                <div className={styles.studentInfo}>
+                  <div className={styles.avatar}>
+                    {s.name?.charAt(0).toUpperCase() || 'S'}
+                  </div>
+                  <div>
+                    <div className={styles.studentName}>
+                      {s.name || '—'}
+                      {(s.enrolledCourseId || s.enrolledCourses?.length > 0) && (
+                        <span className={styles.enrolledBadge}>1 enrolled</span>
+                      )}
+                    </div>
+                    <div className={styles.studentEmail}>{s.email || '—'}</div>
+                  </div>
+                </div>
+                <span className={`${styles.badge} ${cfg.cls}`}>{cfg.label}</span>
+              </div>
+
+              <div className={styles.mobileCardDetails}>
+                <div className={styles.detailRow}>
+                  <span>Phone</span><span>{s.phone || '—'}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Joined</span>
+                  <span>{s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-IN') : '—'}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Expires</span>
+                  <span>
+                    {s.accessExpiresAt ? new Date(s.accessExpiresAt).toLocaleDateString('en-IN') : '—'}
+                    {daysLeft !== null && status === 'active' && (
+                      <span className={`${styles.daysLeft} ${daysLeft <= 7 ? styles.daysWarning : ''}`}>
+                        {' '}({daysLeft}d left)
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Lessons</span>
+                  <span>{new Set(s.completedChapters || []).size}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Amount</span>
+                  <span>{s.paymentAmount ? `₹${s.paymentAmount.toLocaleString('en-IN')}` : '—'}</span>
+                </div>
+              </div>
+
+              <div className={styles.mobileCardActions}>
+                <button
+                  className={`${styles.actionBtn} ${status !== 'revoked' ? styles.revokeBtn : styles.grantBtn}`}
+                  onClick={() => toggleAccess(s)}
+                >
+                  {status !== 'revoked' ? 'Revoke' : 'Grant'}
+                </button>
+                <button
+                  className={`${styles.actionBtn} ${styles.extendBtn}`}
+                  onClick={() => extendAccess(s)}
+                >
+                  +30 Days
+                </button>
+                <button
+                  className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                  onClick={() => setDeleteId(s.id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )
+        }) : (
+          <div className={styles.emptyRow}>No students found.</div>
+        )}
+      </div>
+
       {addModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h3 className={styles.modalTitle}>Add Student Manually</h3>
-
-            {addError && <p className={styles.error}>{addError}</p>}
-
+            {addError && <p className={styles.errorMsg}>{addError}</p>}
             <div className={styles.form}>
               <div className={styles.field}>
                 <label className={styles.label}>Full Name *</label>
@@ -401,7 +491,6 @@ export default function Students() {
                 />
               </div>
             </div>
-
             <div className={styles.modalActions}>
               <button
                 className={styles.cancelBtn}
@@ -421,13 +510,12 @@ export default function Students() {
         </div>
       )}
 
-      {/* Delete Profile Confirm */}
       <ConfirmDialog
-        isOpen={!!deleteStudentId}
-        title="Delete Student Profile"
-        message="Are you sure you want to delete this student profile? They will immediately lose dashboard access. This action cannot be undone."
-        onConfirm={handleDeleteStudent}
-        onCancel={() => setDeleteStudentId(null)}
+        isOpen={!!deleteId}
+        title="Delete Student"
+        message="This will permanently delete this student's account and all data."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
       />
     </div>
   )

@@ -140,3 +140,18 @@
   font-weight: 700;
   font-family: var(--font-mono);
 }
+
+.enrollBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  margin-top: 8px;
+}
+.enrollBtn:hover { opacity: 0.88; }
+
