@@ -2,10 +2,9 @@ import { useEffect, useState, useMemo } from 'react'
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../config/firebase.js'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
-import styles from './Students.module.css'
+import { adminFetch } from '../../utils/adminFetch.js'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
-const ADMIN_SECRET = import.meta.env.VITE_ADMIN_SECRET
 
 export default function Students() {
   const [students, setStudents] = useState([])
@@ -32,12 +31,8 @@ export default function Students() {
     setAddLoading(true)
     setAddError('')
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/add-student`, {
+      const res = await adminFetch(`${BACKEND_URL}/api/auth/add-student`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-secret': ADMIN_SECRET,
-        },
         body: JSON.stringify(addForm),
       })
       const data = await res.json()
@@ -138,9 +133,8 @@ export default function Students() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
-      await fetch(`${BACKEND_URL}/api/auth/user/${deleteId}`, {
+      await adminFetch(`${BACKEND_URL}/api/auth/user/${deleteId}`, {
         method: 'DELETE',
-        headers: { 'x-admin-secret': ADMIN_SECRET },
       })
     } catch {}
     await deleteDoc(doc(db, 'users', deleteId))

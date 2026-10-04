@@ -8,6 +8,19 @@ import { sendWelcomeEmail, sendOneOnOneConfirmationEmail } from '../utils/sendEm
 
 dotenv.config()
 
+const PRICES = {
+  course: 9900,
+  '1on1': 29999,
+}
+
+const generatePassword = () => {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$!'
+  const bytes = crypto.randomBytes(12)
+  return Array.from(bytes)
+    .map(b => chars[b % chars.length])
+    .join('')
+}
+
 const router = express.Router()
 
 const razorpay = new Razorpay({
@@ -18,7 +31,11 @@ const razorpay = new Razorpay({
 // ── Create Razorpay Order ─────────────────────────────
 router.post('/create-order', async (req, res) => {
   try {
-    const { amount, currency = 'INR', type } = req.body
+    const { currency = 'INR', type } = req.body
+    const amount = PRICES[type]
+    if (!amount) {
+      return res.status(400).json({ success: false, error: 'Invalid type' })
+    }
 
     const order = await razorpay.orders.create({
       amount: amount * 100, // paise
@@ -76,8 +93,18 @@ router.post('/verify', async (req, res) => {
       .update(body)
       .digest('hex')
 
-    if (expectedSignature !== razorpay_signature) {
+    const sigBuffer = Buffer.from(razorpay_signature, 'hex')
+    const expBuffer = Buffer.from(expectedSignature, 'hex')
+
+    if (sigBuffer.length !== expBuffer.length ||
+        !crypto.timingSafeEqual(sigBuffer, expBuffer)) {
       return res.status(400).json({ success: false, error: 'Invalid signature' })
+    }
+
+    const order = await razorpay.orders.fetch(razorpay_order_id)
+    const expectedAmount = PRICES[type]
+    if (!expectedAmount || order.amount !== expectedAmount * 100) {
+      return res.status(400).json({ success: false, error: 'Invalid payment amount' })
     }
 
     const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
@@ -97,7 +124,7 @@ router.post('/verify', async (req, res) => {
       }
 
       // STEP 3 — Generate password
-      const tempPassword = `Akash@${Math.floor(1000 + Math.random() * 9000)}`
+      const tempPassword = generatePassword()
 
       // STEP 4 — Firebase user create
       let userRecord
@@ -206,7 +233,10 @@ router.post('/webhook', async (req, res) => {
       .update(body)
       .digest('hex')
 
-    if (signature !== expectedSignature) {
+    const sigBuf = Buffer.from(signature || '', 'hex')
+    const expBuf = Buffer.from(expectedSignature, 'hex')
+    if (sigBuf.length !== expBuf.length ||
+        !crypto.timingSafeEqual(sigBuf, expBuf)) {
       return res.status(400).json({ error: 'Invalid signature' })
     }
 
@@ -232,7 +262,7 @@ router.post('/webhook', async (req, res) => {
         ])
 
         // Generate temp password
-        const tempPassword = `Akash@${Math.floor(1000 + Math.random() * 9000)}`
+        const tempPassword = generatePassword()
 
         // Create Firebase user
         let userRecord

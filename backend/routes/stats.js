@@ -1,6 +1,7 @@
 import express from 'express'
 import { v2 as cloudinary } from 'cloudinary'
 import { db } from '../config/firebase.js'
+import { adminMiddleware } from '../middleware/adminMiddleware.js'
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -11,12 +12,8 @@ cloudinary.config({
 
 const router = express.Router()
 
-router.get('/usage', async (req, res) => {
+router.get('/usage', adminMiddleware, async (req, res) => {
   try {
-    const adminSecret = req.headers['x-admin-secret']
-    if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
-      return res.status(403).json({ error: 'Forbidden' })
-    }
 
     // ── Cloudinary ──
     const cloudinaryUsage = await cloudinary.api.usage()

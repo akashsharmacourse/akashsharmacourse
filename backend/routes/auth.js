@@ -1,6 +1,15 @@
 import express from 'express'
+import crypto from 'crypto'
 import { auth, db } from '../config/firebase.js'
 import { adminMiddleware } from '../middleware/adminMiddleware.js'
+
+const generatePassword = () => {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$!'
+  const bytes = crypto.randomBytes(12)
+  return Array.from(bytes)
+    .map(b => chars[b % chars.length])
+    .join('')
+}
 
 const router = express.Router()
 
@@ -35,17 +44,12 @@ router.delete('/user/:uid', adminMiddleware, async (req, res) => {
 })
 
 // Add student manually by admin
-router.post('/add-student', async (req, res) => {
+router.post('/add-student', adminMiddleware, async (req, res) => {
   try {
-    const adminSecret = req.headers['x-admin-secret']
-    if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
-      return res.status(403).json({ error: 'Forbidden' })
-    }
-
     const { name, email, phone, accessDays = 30 } = req.body
 
     // Generate password
-    const tempPassword = `Akash@${Math.floor(1000 + Math.random() * 9000)}`
+    const tempPassword = generatePassword()
 
     // Create Firebase Auth user
     let userRecord

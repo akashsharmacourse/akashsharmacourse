@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Modal from '../../components/Modal/Modal.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
+import { adminFetch } from '../../utils/adminFetch.js'
 import styles from './CourseDetail.module.css'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
@@ -17,12 +18,8 @@ const uploadToCloudinary = async (file, resourceType = 'video') => {
     console.log('Starting upload:', file.name, 'type:', resourceType)
 
     // Get signature
-    const signRes = await fetch(`${BACKEND_URL}/api/upload/sign`, {
+    const signRes = await adminFetch(`${BACKEND_URL}/api/upload/sign`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': import.meta.env.VITE_ADMIN_SECRET,
-      },
       body: JSON.stringify({
         folder: 'courses',
         resource_type: resourceType === 'pdf' ? 'raw' : resourceType,

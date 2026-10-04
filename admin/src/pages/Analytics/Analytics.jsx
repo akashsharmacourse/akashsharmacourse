@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
+import { adminFetch } from '../../utils/adminFetch.js'
 import styles from './Analytics.module.css'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
-const ADMIN_SECRET = import.meta.env.VITE_ADMIN_SECRET
 
 export default function Analytics() {
   const [stats, setStats] = useState(null)
@@ -16,9 +16,7 @@ export default function Analytics() {
   const fetchStats = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${BACKEND_URL}/api/stats/usage`, {
-        headers: { 'x-admin-secret': ADMIN_SECRET }
-      })
+      const res = await adminFetch(`${BACKEND_URL}/api/stats/usage`)
       const data = await res.json()
       if (data.success) {
         setStats(data)

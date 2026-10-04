@@ -15,9 +15,24 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 5000
 
-// ── Middleware ────────────────────────────────────────
+const allowedOrigins = [
+  'https://askakashsharma.in',
+  'https://www.askakashsharma.in',
+  'https://app.askakashsharma.in',
+  'https://admin.askakashsharma.in',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+]
+
 app.use(cors({
-  origin: true, // Allow all origins in development
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
 }))
 
