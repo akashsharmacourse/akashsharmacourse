@@ -3,6 +3,7 @@ import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firesto
 import { db } from '../../config/firebase.js'
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx'
 import { adminFetch } from '../../utils/adminFetch.js'
+import styles from './Students.module.css'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
 
