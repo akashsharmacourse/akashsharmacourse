@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { CheckCircle, Mail, Users, BookOpen } from 'lucide-react'
 import { courseSuccessData } from '../../data/data.js'
 import { useInView } from '../../hooks/useInView'
@@ -7,6 +8,15 @@ const iconMap = { Mail, Users, BookOpen }
 
 export default function CourseSuccess() {
   const [ref, inView] = useInView(0.1)
+
+  useEffect(() => {
+    if (window.fbq) {
+      window.fbq('track', 'Purchase', {
+        value: 9900,
+        currency: 'INR',
+      })
+    }
+  }, [])
 
   return (
     <main className={styles.page}>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { CheckCircle, Calendar, Mail, MessageCircle } from 'lucide-react'
 import { oneOnOneSuccessData } from '../../data/data.js'
 import { useInView } from '../../hooks/useInView'
@@ -7,6 +8,15 @@ const iconMap = { Calendar, Mail, MessageCircle }
 
 export default function OneOnOneSuccess() {
   const [ref, inView] = useInView(0.1)
+
+  useEffect(() => {
+    if (window.fbq) {
+      window.fbq('track', 'Purchase', {
+        value: 29999,
+        currency: 'INR',
+      })
+    }
+  }, [])
 
   return (
     <main className={styles.page}>
